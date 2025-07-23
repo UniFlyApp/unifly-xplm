@@ -10,3 +10,12 @@ void Log (const char* szMsg, ... )
     // write to log (flushed immediately -> expensive!)
     XPLMDebugString(buf);
 }
+
+std::string GetPluginPath()
+{
+	XPLMPluginID myId = XPLMGetMyID();
+	char buffer[2048];
+	XPLMGetPluginInfo(myId, nullptr, buffer, nullptr, nullptr);
+	char* path = XPLMExtractFileAndPath(buffer);
+	return std::string(buffer, 0, path - buffer) + "/../";
+}

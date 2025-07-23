@@ -35,8 +35,8 @@
 // External library headers
 // #include <msgpack.hpp>
 // #include <nlohmann/json.hpp>
-// #include <nng/nng.h>
-// #include <nng/protocol/pair1/pair.h>
+#include <nng/nng.h>
+#include <nng/protocol/pair1/pair.h>
 
 // XPLM SDK
 #include "XPLMDataAccess.h"

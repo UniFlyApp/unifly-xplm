@@ -15,18 +15,16 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 set (INCLUDE_FMOD_SOUND 1)
 add_compile_definitions(INCLUDE_FMOD_SOUND=1)
 
-# configure_file(${CMAKE_SOURCE_DIR}/include/constants.h.in ${CMAKE_SOURCE_DIR}/include/constants.h @ONLY)
-
-# if(WIN32)
-#     include_directories(${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/nng/include)
-#     find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../dependencies/platform/windows/nng)
-# elseif(APPLE)
-#     include_directories(${CMAKE_SOURCE_DIR}/../dependencies/platform/macos/nng/include)
-#     find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../dependencies/platform/macos/nng)
-# elseif(UNIX)
-#     include_directories(${CMAKE_SOURCE_DIR}/../dependencies/platform/linux/nng/include)
-#     find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/../dependencies/platform/linux/nng)
-# endif()
+if(WIN32)
+    include_directories(${CMAKE_SOURCE_DIR}/dep/platform/windows/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/dep/platform/windows/nng)
+elseif(APPLE)
+    include_directories(${CMAKE_SOURCE_DIR}/dep/platform/macos/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/dep/platform/macos/nng)
+elseif(UNIX)
+    include_directories(${CMAKE_SOURCE_DIR}/dep/platform/linux/nng/include)
+    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/dep/platform/linux/nng)
+endif()
 
 # add_subdirectory(${CMAKE_SOURCE_DIR}/../dependencies/msgpack-c ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c)
 # add_subdirectory(${CMAKE_SOURCE_DIR}/../dependencies/json ${CMAKE_CURRENT_BINARY_DIR}/json)
@@ -39,48 +37,22 @@ include_directories(${CMAKE_SOURCE_DIR}/inc)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
 set(INCLUDES
-  # inc/abacus.hpp
-  # inc/vector3.hpp
-  # inc/aircraft_manager.h
-  # inc/config.h
-  # inc/constants.h
-  # inc/dto.h
-  # inc/data_ref_access.h
-  # inc/frame_rate_monitor.h
-  # inc/nearby_atc_window.h
-  # inc/network_aircraft.h
-  # inc/notification_panel.h
-  # inc/owned_data_ref.h
   inc/plugin.h
-  # inc/settings_window.h
-  # inc/stopwatch.h
-  # inc/terrain_probe.h
-  # inc/text_message_console.h
-  inc/utilities.h
   inc/unifly.h
-  # inc/xpilot_api.h
-  # inc/xplane_command.h
+  inc/utilities.h
+  inc/data_ref_owned.h
+  inc/data_ref_access.h
   inc/stdafx.h
 )
 
 source_group("Header Files" FILES ${INCLUDES})
 
 set(SRC
-  # src/aircraft_manager.cpp
-  # src/config.cpp
-  # src/data_ref_access.cpp
-  # src/frame_rate_monitor.cpp
-  # src/nearby_atc_window.cpp
-  # src/network_aircraft.cpp
-  # src/notification_panel.cpp
-  # src/owned_data_ref.cpp
   src/plugin.cpp
-  src/utilities.cpp
   src/unifly.cpp
-  # src/settings_window.cpp
-  # src/stopwatch.cpp
-  # src/terrain_probe.cpp
-  # src/text_message_console.cpp
+  src/utilities.cpp
+  src/data_ref_owned.cpp
+  src/data_ref_access.cpp
 )
 
 source_group("Source Files" FILES ${SRC})
@@ -112,6 +84,7 @@ if (WIN32 OR APPLE)
 endif ()
 
 # target_link_libraries(${PROJECT_NAME} msgpack-cxx nlohmann_json ${LIB_NNG})
+target_link_libraries(${PROJECT_NAME} ${LIB_NNG})
 
 if (WIN32)
     set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
