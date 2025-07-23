@@ -33,9 +33,9 @@ add_compile_definitions(INCLUDE_FMOD_SOUND=1)
 
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp
-    ${PROJECT_SOURCE_DIR}/include/*.h)
+    ${PROJECT_SOURCE_DIR}/inc/*.h)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/inc)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
 set(INCLUDES
@@ -51,13 +51,13 @@ set(INCLUDES
   # inc/network_aircraft.h
   # inc/notification_panel.h
   # inc/owned_data_ref.h
-  # inc/plugin.h
+  inc/plugin.h
   # inc/settings_window.h
   # inc/stopwatch.h
   # inc/terrain_probe.h
   # inc/text_message_console.h
-  # inc/utilities.h
-  # inc/xpilot.h
+  inc/utilities.h
+  inc/unifly.h
   # inc/xpilot_api.h
   # inc/xplane_command.h
   inc/stdafx.h
@@ -75,11 +75,12 @@ set(SRC
   # src/notification_panel.cpp
   # src/owned_data_ref.cpp
   src/plugin.cpp
+  src/utilities.cpp
+  src/unifly.cpp
   # src/settings_window.cpp
   # src/stopwatch.cpp
   # src/terrain_probe.cpp
   # src/text_message_console.cpp
-  # src/xpilot.cpp
 )
 
 source_group("Source Files" FILES ${SRC})
@@ -133,7 +134,7 @@ elseif (APPLE)
       ${OpenGL_LIBRARY})
 
     # Restrict set of symbols exported from the plugin to the ones required by XPLM:
-    target_link_libraries(${PROJECT_NAME} "-exported_symbols_list ${CMAKE_SOURCE_DIR}/src/xpilot.sym_mac")
+    target_link_libraries(${PROJECT_NAME} "-exported_symbols_list ${CMAKE_SOURCE_DIR}/src/unifly.sym_mac")
 elseif (UNIX)
     # Link library for dynamic loading of shared objects on UNIX systems.
     find_library(DL_LIBRARY dl REQUIRED)
@@ -144,7 +145,7 @@ elseif (UNIX)
     target_link_libraries(${PROJECT_NAME} ${DL_LIBRARY} Threads::Threads)
     # Specify additional runtime search paths for dynamically-linked libraries.
     # Restrict set of symbols exported from the plugin to the ones required by XPLM:
-    target_link_libraries(${PROJECT_NAME} -Wl,--version-script -Wl,${CMAKE_SOURCE_DIR}/src/xpilot.sym)
+    target_link_libraries(${PROJECT_NAME} -Wl,--version-script -Wl,${CMAKE_SOURCE_DIR}/src/unifly.sym)
 endif ()
 
 # Link OpenGL
@@ -189,6 +190,6 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE "inc/stdafx.h")
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
     PREFIX ""
-    OUTPUT_NAME "xPilot"
+    OUTPUT_NAME "unifly"
     SUFFIX ".xpl"
 )
