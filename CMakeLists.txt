@@ -39,28 +39,28 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
 set(INCLUDES
-  # include/abacus.hpp
-  # include/vector3.hpp
-  # include/aircraft_manager.h
-  # include/config.h
-  # include/constants.h
-  # include/dto.h
-  # include/data_ref_access.h
-  # include/frame_rate_monitor.h
-  # include/nearby_atc_window.h
-  # include/network_aircraft.h
-  # include/notification_panel.h
-  # include/owned_data_ref.h
-  # include/plugin.h
-  # include/settings_window.h
-  # include/stopwatch.h
-  # include/terrain_probe.h
-  # include/text_message_console.h
-  # include/utilities.h
-  # include/xpilot.h
-  # include/xpilot_api.h
-  # include/xplane_command.h
-  include/stdafx.h
+  # inc/abacus.hpp
+  # inc/vector3.hpp
+  # inc/aircraft_manager.h
+  # inc/config.h
+  # inc/constants.h
+  # inc/dto.h
+  # inc/data_ref_access.h
+  # inc/frame_rate_monitor.h
+  # inc/nearby_atc_window.h
+  # inc/network_aircraft.h
+  # inc/notification_panel.h
+  # inc/owned_data_ref.h
+  # inc/plugin.h
+  # inc/settings_window.h
+  # inc/stopwatch.h
+  # inc/terrain_probe.h
+  # inc/text_message_console.h
+  # inc/utilities.h
+  # inc/xpilot.h
+  # inc/xpilot_api.h
+  # inc/xplane_command.h
+  inc/stdafx.h
 )
 
 source_group("Header Files" FILES ${INCLUDES})
@@ -110,7 +110,7 @@ if (WIN32 OR APPLE)
     target_link_libraries(${PROJECT_NAME} ${XPLM_LIBRARY} ${FMOD_LIBRARY})
 endif ()
 
-target_link_libraries(${PROJECT_NAME} msgpack-cxx nlohmann_json ${LIB_NNG})
+# target_link_libraries(${PROJECT_NAME} msgpack-cxx nlohmann_json ${LIB_NNG})
 
 if (WIN32)
     set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -184,7 +184,7 @@ elseif (UNIX)
    set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lin_x64")
 endif()
 
-target_precompile_headers(${PROJECT_NAME} PRIVATE "include/stdafx.h")
+target_precompile_headers(${PROJECT_NAME} PRIVATE "inc/stdafx.h")
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
