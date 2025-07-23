@@ -163,6 +163,6 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE "inc/stdafx.h")
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
     PREFIX ""
-    OUTPUT_NAME "unifly"
+    OUTPUT_NAME "UniFly-XPLM"
     SUFFIX ".xpl"
 )
