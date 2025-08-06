@@ -7,27 +7,11 @@ set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
 
-set(MSGPACK_USE_BOOST OFF CACHE INTERNAL "" FORCE)
-
 set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
 set (INCLUDE_FMOD_SOUND 1)
 add_compile_definitions(INCLUDE_FMOD_SOUND=1)
-
-if(WIN32)
-    include_directories(${CMAKE_SOURCE_DIR}/dep/platform/windows/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/dep/platform/windows/nng)
-elseif(APPLE)
-    include_directories(${CMAKE_SOURCE_DIR}/dep/platform/macos/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/dep/platform/macos/nng)
-elseif(UNIX)
-    include_directories(${CMAKE_SOURCE_DIR}/dep/platform/linux/nng/include)
-    find_library(LIB_NNG nng ${CMAKE_SOURCE_DIR}/dep/platform/linux/nng)
-endif()
-
-# add_subdirectory(${CMAKE_SOURCE_DIR}/../dependencies/msgpack-c ${CMAKE_CURRENT_BINARY_DIR}/msgpack-c)
-# add_subdirectory(${CMAKE_SOURCE_DIR}/../dependencies/json ${CMAKE_CURRENT_BINARY_DIR}/json)
 
 file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.cpp
@@ -36,6 +20,29 @@ file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
 include_directories(${CMAKE_SOURCE_DIR}/inc)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
+# Protobuffers
+find_package(Protobuf REQUIRED)
+include_directories(${Protobuf_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})  # For generated .pb.h
+
+file(REAL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../crates/sim-xplane-ipc/schema/" PROTO_IMPORT_DIR)
+message("PROTO SCHEMAS = ${PROTO_IMPORT_DIR}")
+
+file(GLOB PROTO_FILES "${PROTO_IMPORT_DIR}/*.proto")
+
+protobuf_generate_cpp(
+    PROTO_SRCS
+    PROTO_HDRS
+    ${PROTO_FILES}
+)
+
+message("PROTO SOURCE  = ${PROTO_SRCS}")
+message("PROTO HEADERS = ${PROTO_HDRS}")
+
+
+
+# Header & source files
+
 set(INCLUDES
   inc/plugin.h
   inc/unifly.h
@@ -43,6 +50,8 @@ set(INCLUDES
   inc/data_ref_owned.h
   inc/data_ref_access.h
   inc/stdafx.h
+
+  ${PROTO_HDRS}
 )
 
 source_group("Header Files" FILES ${INCLUDES})
@@ -50,9 +59,12 @@ source_group("Header Files" FILES ${INCLUDES})
 set(SRC
   src/plugin.cpp
   src/unifly.cpp
+  src/socket.cpp
   src/utilities.cpp
   src/data_ref_owned.cpp
   src/data_ref_access.cpp
+
+  ${PROTO_SRCS}
 )
 
 source_group("Source Files" FILES ${SRC})
@@ -82,9 +94,6 @@ if (WIN32 OR APPLE)
     find_library(XPLM_LIBRARY NAMES XPLM XPLM_64.lib REQUIRED)
     target_link_libraries(${PROJECT_NAME} ${XPLM_LIBRARY} ${FMOD_LIBRARY})
 endif ()
-
-# target_link_libraries(${PROJECT_NAME} msgpack-cxx nlohmann_json ${LIB_NNG})
-target_link_libraries(${PROJECT_NAME} ${LIB_NNG})
 
 if (WIN32)
     set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -132,8 +141,6 @@ add_definitions(-DXPLM200=1 -DXPLM210=1 -DXPLM300=1 -DXPLM301=1 -DXPLM303=1)
 
 # Define platform macros.
 add_definitions(-DAPL=$<BOOL:${APPLE}> -DIBM=$<BOOL:${WIN32}> -DLIN=$<AND:$<BOOL:${UNIX}>,$<NOT:$<BOOL:${APPLE}>>>)
-
-add_definitions(-DNNG_STATIC_LIB)
 
 if (UNIX OR APPLE)
     add_compile_options(-fexceptions -fpermissive)

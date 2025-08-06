@@ -8,7 +8,7 @@ std::unique_ptr<unifly::UniFly> environment;
 
 PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescription)
 {
-	strcpy(outName, "UniFly");
+    strcpy(outName, "UniFly");
 	strcpy(outSignature, "gg.unifly.xplm");
 	strcpy(outDescription, "UniFly cross platform multiplayer XPLM Adapter");
 

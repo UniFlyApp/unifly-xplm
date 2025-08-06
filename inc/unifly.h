@@ -30,7 +30,7 @@ namespace unifly
     	bool InitializeXPMP();
 
         bool m_keepSocketAlive = false;
-		nng_socket m_socket;
+		// nng_socket m_socket;
 		std::unique_ptr<std::thread> m_socketThread;
 
 		void SocketWorker();
