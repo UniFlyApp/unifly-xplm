@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
 
-set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")
+# set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")   TODO Fat architecture support for macos
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
 set (INCLUDE_FMOD_SOUND 1)
@@ -21,25 +21,40 @@ include_directories(${CMAKE_SOURCE_DIR}/inc)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
 # Protobuffers
-find_package(Protobuf REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+message("PROTO VESRION = ${Protobuf_VERSION}")
+
 include_directories(${Protobuf_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})  # For generated .pb.h
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 file(REAL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../crates/sim-xplane-ipc/schema/" PROTO_IMPORT_DIR)
 message("PROTO SCHEMAS = ${PROTO_IMPORT_DIR}")
 
 file(GLOB PROTO_FILES "${PROTO_IMPORT_DIR}/*.proto")
+# message("PROTO FILES   = ${PROTO_FILES}")
 
-protobuf_generate_cpp(
-    PROTO_SRCS
-    PROTO_HDRS
-    ${PROTO_FILES}
+protobuf_generate(
+    LANGUAGE cpp
+    PROTOS ${PROTO_FILES}
+    IMPORT_DIRS ${PROTO_IMPORT_DIR}
+    OUT_VAR PROTO_OUT
 )
+
+# Protobuf: Filter .h and .cc
+# message("PROTO_OUT     = ${PROTO_OUT}")
+
+set(PROTO_HDRS "")
+set(PROTO_SRCS "")
+foreach(file ${PROTO_OUT})
+  if(file MATCHES "\\.h$")
+    list(APPEND PROTO_HDRS ${file})
+  elseif(file MATCHES "\\.cc$")
+    list(APPEND PROTO_SRCS ${file})
+  endif()
+endforeach()
 
 message("PROTO SOURCE  = ${PROTO_SRCS}")
 message("PROTO HEADERS = ${PROTO_HDRS}")
-
-
 
 # Header & source files
 
@@ -70,6 +85,8 @@ set(SRC
 source_group("Source Files" FILES ${SRC})
 set(ALL_FILES ${INCLUDES} ${SRC})
 add_library(${PROJECT_NAME} MODULE ${ALL_FILES})
+
+target_link_libraries(${CMAKE_PROJECT_NAME} protobuf::libprotobuf)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/dep)
 
