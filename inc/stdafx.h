@@ -41,3 +41,10 @@
 #include "XPLMProcessing.h"
 #include "XPLMScenery.h"
 #include "XPLMUtilities.h"
+
+// Asio
+#include <asio.hpp>
+
+// Protobuf
+#include "message.pb.h"
+#include "pilot_local.pb.h"

@@ -1,8 +1,14 @@
 #include "unifly.h"
 #include "data_ref_access.h"
 #include "utilities.h"
+#include "socket.h"
 
 #include "XPMPMultiplayer.h"
+
+using asio::ip::tcp;
+
+// Defined seperately in the Rust code
+#define XPLM_PORT 9925
 
 namespace unifly
 {
@@ -25,42 +31,19 @@ namespace unifly
         TryGetTcasControl();
         XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 
-  //       int rv;
-		// if ((rv = nng_pair1_open(&m_socket)) != 0)
-		// {
-		// 	Log("UniFly: Error opening socket: %s", nng_strerror(rv));
-		// 	return;
-		// }
-
-		// nng_setopt_int(m_socket, NNG_OPT_RECVBUF, 8192);
-		// nng_setopt_int(m_socket, NNG_OPT_SENDBUF, 8192);
-
-		// std::string url = "ipc:///tmp//unifly.ipc";
-
-		// if ((rv = nng_listen(m_socket, url.c_str(), NULL, 0)) != 0)
-		// {
-		// 	Log("UniFly: Socket listen error (%s): %s", url.c_str(), nng_strerror(rv));
-		// 	return;
-		// }
-		// Log("UniFly: Now listening on %s", url.c_str());
-
-		// m_keepSocketAlive = true;
-		// m_socketThread = std::make_unique<std::thread>(&UniFly::SocketWorker, this);
+        m_keepSocketAlive = true;
+        m_socketThread = std::make_unique<std::thread>(&UniFly::SocketWorker, this);
     }
 
     void UniFly::Shutdown()
     {
         //TODO: Shutdown message on the socket?
 
-        // m_keepSocketAlive = false;
+        m_keepSocketAlive = false;
 
-        // nng_close(m_socket);
-        // m_socket = NNG_SOCKET_INITIALIZER;
-        // nng_fini();
-
-        // if (m_socketThread) {
-        //     m_socketThread->join();
-        // }
+        if (m_socketThread) {
+            m_socketThread->join();
+        }
     }
 
     int CBIntPrefsFunc(const char*, [[maybe_unused]] const char* item, int defaultVal)
@@ -121,6 +104,56 @@ namespace unifly
 
 	void UniFly::SocketWorker()
 	{
+    	try {
+            asio::io_context io;
+            tcp::acceptor acceptor(io, tcp::endpoint(tcp::v4(), XPLM_PORT));
+
+            while (m_keepSocketAlive)
+                {
+                tcp::socket socket(io);
+
+                Log("[server] Waiting for connection...\n");
+                acceptor.accept(socket); // blocking accept
+
+                Log("[server] Client connected\n");
+
+                try {
+                    while (true) {
+                        unifly::schema::XPlaneMessage message;
+                        if (!recv_message(socket, &message)) {
+                            // If recv_message fails, it's likely due to a disconnected client
+                            std::cerr << "Failed to receive message or client disconnected.\n";
+                            break;
+                        }
+
+                        std::cout << "Received message:\n" << message.DebugString() << std::endl;
+
+                        unifly::schema::XPLMMessage res;
+                        unifly::schema::ReadLocalFrequent* freq = res.mutable_read_local_frequent();
+                        freq->set_lat(255.0);
+
+                        std::cout << "Return message:\n" << res.DebugString() << std::endl;
+
+                        if (!send_message(socket, res)) {
+                            std::cerr << "Failed to send message or client disconnected.\n";
+                            break;
+                        }
+                    }
+
+                    for (;;) {
+                        char data[1024];
+                        std::size_t len = socket.read_some(asio::buffer(data));
+                        std::cout << "[server] Received: "
+                                << std::string(data, len) << "\n";
+                    }
+                } catch (std::exception& e) {
+                    std::cout << "[server] Connection closed: " << e.what() << "\n";
+                }
+            }
+        } catch (std::exception& e) {
+            std::cerr << "[fatal] " << e.what() << "\n";
+        }
+
 		// while (m_keepSocketAlive)
 		// {
 		// 	char* buffer;
@@ -131,7 +164,7 @@ namespace unifly
 
 		// 	if (err == 0)
 		// 	{
-		// 	    Log("UniFly received message of %s bytes", bufferLen);
+			    // Log("UniFly received message of %s bytes", bufferLen);
 		// 		// BaseDto dto;
 		// 		// auto obj = msgpack::unpack(reinterpret_cast<const char*>(buffer), bufferLen);
 

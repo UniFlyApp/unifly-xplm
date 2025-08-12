@@ -20,18 +20,23 @@ file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
 include_directories(${CMAKE_SOURCE_DIR}/inc)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
+
 # Protobuffers
 find_package(Protobuf CONFIG REQUIRED)
 message("PROTO VESRION = ${Protobuf_VERSION}")
 
 include_directories(${Protobuf_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})  # For generated .pb.h
 
-file(REAL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../crates/sim-xplane-ipc/schema/" PROTO_IMPORT_DIR)
+file(
+    REAL_PATH
+    "${CMAKE_CURRENT_SOURCE_DIR}/../crates/sim-xplane-ipc/schema/"
+    PROTO_IMPORT_DIR
+)
 message("PROTO SCHEMAS = ${PROTO_IMPORT_DIR}")
 
 file(GLOB PROTO_FILES "${PROTO_IMPORT_DIR}/*.proto")
-# message("PROTO FILES   = ${PROTO_FILES}")
+message("PROTO FILES   = ${PROTO_FILES}")
 
 protobuf_generate(
     LANGUAGE cpp
@@ -41,7 +46,7 @@ protobuf_generate(
 )
 
 # Protobuf: Filter .h and .cc
-# message("PROTO_OUT     = ${PROTO_OUT}")
+message("PROTO_OUT     = ${PROTO_OUT}")
 
 set(PROTO_HDRS "")
 set(PROTO_SRCS "")
@@ -61,6 +66,7 @@ message("PROTO HEADERS = ${PROTO_HDRS}")
 set(INCLUDES
   inc/plugin.h
   inc/unifly.h
+  inc/socket.h
   inc/utilities.h
   inc/data_ref_owned.h
   inc/data_ref_access.h
@@ -87,8 +93,14 @@ set(ALL_FILES ${INCLUDES} ${SRC})
 add_library(${PROJECT_NAME} MODULE ${ALL_FILES})
 
 target_link_libraries(${CMAKE_PROJECT_NAME} protobuf::libprotobuf)
-
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/dep)
+
+target_include_directories(${PROJECT_NAME}
+  PRIVATE
+    ${CMAKE_SOURCE_DIR}/dep/asio/asio
+    ${CMAKE_SOURCE_DIR}/dep/asio
+    ${Protobuf_INCLUDE_DIRS}
+)
 
 if (APPLE)
     list(APPEND CMAKE_LIBRARY_PATH "${CMAKE_SOURCE_DIR}/dep/SDK/Libraries/Mac")
