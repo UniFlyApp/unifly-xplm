@@ -1,14 +1,48 @@
-void Log (const char* szMsg, ... )
+#include <string>
+
+#include "XPLMUtilities.h"
+
+inline float GetNetworkTime()
 {
-    char buf[512];
-    va_list args;
-    // Write all the variable parameters
-    va_start (args, szMsg);
-    std::vsnprintf(buf, sizeof(buf)-2, szMsg, args);
-    va_end (args);
-    std::strcat(buf, "\n");
-    // write to log (flushed immediately -> expensive!)
-    XPLMDebugString(buf);
+	static XPLMDataRef drNetworkTime = nullptr;
+	if (!drNetworkTime)
+	{
+		drNetworkTime = XPLMFindDataRef("sim/network/misc/network_time_sec");
+	}
+	return XPLMGetDataf(drNetworkTime);
+}
+
+inline const char* Logger(const char* msg, va_list args)
+{
+	static char buf[2048];
+
+	float secs = GetNetworkTime();
+	const unsigned hours = unsigned(secs / 3600.0f);
+	secs -= hours * 3600.0f;
+	const unsigned mins = unsigned(secs / 60.0f);
+	secs -= mins * 60.0f;
+
+	snprintf(buf, sizeof(buf), "%u:%02u:%06.3f %s:", hours, mins, secs, "UniFly");
+	if (args)
+	{
+		vsnprintf(&buf[strlen(buf)], sizeof(buf) - strlen(buf) - 1, msg, args);
+	}
+	size_t length = strlen(buf);
+	if (buf[length - 1] != '\n')
+	{
+		buf[length] = '\n';
+		buf[length + 1] = 0;
+	}
+	return buf;
+}
+
+
+void Log(const char* msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+	XPLMDebugString(Logger(msg, args));
+	va_end(args);
 }
 
 std::string GetPluginPath()

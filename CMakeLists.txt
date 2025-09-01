@@ -7,7 +7,6 @@ set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
 
-# set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64")   TODO Fat architecture support for macos
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
 set (INCLUDE_FMOD_SOUND 1)
@@ -26,7 +25,7 @@ find_package(Protobuf CONFIG REQUIRED)
 message("PROTO VESRION = ${Protobuf_VERSION}")
 
 include_directories(${Protobuf_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})  # For generated .pb.h
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 file(
     REAL_PATH
@@ -97,7 +96,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/dep)
 
 target_include_directories(${PROJECT_NAME}
   PRIVATE
-    ${CMAKE_SOURCE_DIR}/dep/asio/asio
     ${CMAKE_SOURCE_DIR}/dep/asio
     ${Protobuf_INCLUDE_DIRS}
 )
@@ -189,7 +187,8 @@ if (MSVC)
    set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL "${CMAKE_BINARY_DIR}/win_x64")
    set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/win_x64")
 elseif (APPLE)
-   set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/mac_x64")
+    # Because we're here building for two architectures and then putting them together we'll just leave it
+   # set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/mac_x64")
 elseif (UNIX)
    set_target_properties(${PROJECT_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lin_x64")
 endif()

@@ -27,6 +27,7 @@ namespace unifly
 
     void UniFly::Initialize()
     {
+        Log("init");
         InitializeXPMP();
         TryGetTcasControl();
         XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
@@ -112,46 +113,38 @@ namespace unifly
                 {
                 tcp::socket socket(io);
 
-                Log("[server] Waiting for connection...\n");
-                acceptor.accept(socket); // blocking accept
+                Log("Waiting for connection...");
+                acceptor.accept(socket);
 
-                Log("[server] Client connected\n");
+                Log("Client connected\n");
 
                 try {
                     while (true) {
                         unifly::schema::XPlaneMessage message;
                         if (!recv_message(socket, &message)) {
-                            // If recv_message fails, it's likely due to a disconnected client
-                            std::cerr << "Failed to receive message or client disconnected.\n";
+                            Log("Failed to receive message or client disconnected");
                             break;
                         }
 
-                        std::cout << "Received message:\n" << message.DebugString() << std::endl;
+                        Log("UniFly: Received message");
 
                         unifly::schema::XPLMMessage res;
                         unifly::schema::ReadLocalFrequent* freq = res.mutable_read_local_frequent();
                         freq->set_lat(255.0);
 
-                        std::cout << "Return message:\n" << res.DebugString() << std::endl;
+                        Log("UniFly: Return message");
 
                         if (!send_message(socket, res)) {
-                            std::cerr << "Failed to send message or client disconnected.\n";
+                            Log("UniFly: Failed to send message or client disconnected");
                             break;
                         }
                     }
-
-                    for (;;) {
-                        char data[1024];
-                        std::size_t len = socket.read_some(asio::buffer(data));
-                        std::cout << "[server] Received: "
-                                << std::string(data, len) << "\n";
-                    }
                 } catch (std::exception& e) {
-                    std::cout << "[server] Connection closed: " << e.what() << "\n";
+                    Log("UniFly: Connection closed", e.what());
                 }
             }
         } catch (std::exception& e) {
-            std::cerr << "[fatal] " << e.what() << "\n";
+            Log("UniFly: Fatal error in socket", e.what());
         }
 
 		// while (m_keepSocketAlive)

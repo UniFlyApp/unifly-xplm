@@ -1,3 +1,5 @@
+#include "utilities.h"
+
 using asio::ip::tcp;
 
 bool write_exact(tcp::socket& socket, asio::const_buffer buffer) {
@@ -35,26 +37,14 @@ bool send_message(tcp::socket& socket, const unifly::schema::XPLMMessage& messag
     return write_exact(socket, asio::buffer(buffer));
 }
 
-void print_buffer(const asio::const_buffer& buffer) {
-    // Get the pointer to the data
-    const unsigned char* data = static_cast<const unsigned char*>(buffer.data());
-    // Get the size of the buffer
-    std::size_t size = buffer.size();
-
-    for (std::size_t i = 0; i < size; ++i) {
-        // Print each byte in hex with leading zeros and a space
-        std::cout << std::hex << std::setw(2) << std::setfill('0')
-                  << static_cast<int>(data[i]) << ' ';
-    }
-    std::cout << std::dec << std::endl; // Reset to decimal output
-}
-
 // Receives a length-prefixed Protobuf message
 bool recv_message(tcp::socket& socket, unifly::schema::XPlaneMessage* message) {
     if (!message) {
-        std::cerr << "Message pointer is null!\n";
+        Log("recv_message: Message pointer is null");
         return false;
     }
+
+    Log("a");
 
     asio::error_code ec;
 
@@ -62,15 +52,19 @@ bool recv_message(tcp::socket& socket, unifly::schema::XPlaneMessage* message) {
     uint8_t prefix_buf[sizeof(uint16_t)]{};
     size_t prefix_read = asio::read(socket, asio::buffer(prefix_buf, sizeof(prefix_buf)), ec);
     if (ec || prefix_read != sizeof(prefix_buf)) {
-        std::cerr << "Failed to read length prefix: " << ec.message() << "\n";
+        Log("recv_message: Failed to read length prefix %s", ec.message().c_str());
         return false;
     }
+
+    Log("b");
 
     uint16_t message_length = 0;
     google::protobuf::io::CodedInputStream::ReadLittleEndian16FromArray(prefix_buf, &message_length);
 
+    Log("c %i", message_length);
+
     if (message_length == 0 || message_length > 65535) {
-        std::cerr << "Invalid message length: " << message_length << "\n";
+        Log("recv_message: Invalid message length %i", message_length);
         return false;
     }
 
@@ -78,15 +72,24 @@ bool recv_message(tcp::socket& socket, unifly::schema::XPlaneMessage* message) {
     std::vector<uint8_t> buffer(message_length);
     size_t body_read = asio::read(socket, asio::buffer(buffer.data(), message_length), ec);
     if (ec || body_read != message_length) {
-        std::cerr << "Failed to read message body: " << ec.message() << "\n";
+        Log("recv_message: Failed to read message body %s", ec.message().c_str());
         return false;
     }
 
+    Log("body_read %i", body_read);
+
+    print_buffer(buffer.data())
+
+    message->DebugString().c_str();
+
+    Log("dddd %s", message->DebugString().c_str());
+
     // Parse buffer
     if (!message->ParseFromArray(buffer.data(), message_length)) {
-        std::cerr << "ParseFromArray failed — payload corrupted or schema mismatch.\n";
+        Log("recv_message: Deserialization failed %s", ec.message().c_str());
         return false;
     }
+    Log("e");
 
     return true;
 }
