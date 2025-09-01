@@ -2,6 +2,10 @@
 
 using asio::ip::tcp;
 
+// We do all our reading on the socket thread
+// And all our writing on the xplane thread
+// (with the exception of Open)
+
 bool write_exact(tcp::socket& socket, asio::const_buffer buffer) {
     asio::error_code ec;
     // asio::write will loop internally until the entire buffer is sent

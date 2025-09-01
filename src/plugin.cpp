@@ -59,6 +59,7 @@ PLUGIN_API void XPluginDisable(void)
 {
 	try
 	{
+	    Log("XPluginDisabling");
 		environment->DeleteAllAircraft();
 		environment->Shutdown();
 		environment.reset();
@@ -88,6 +89,7 @@ PLUGIN_API void XPluginStop(void)
 		// XPLMUnregisterCommandHandler(ContactAtcCommand, ContactAtcCommandHandler, 0, 0);
 		// XPLMUnregisterCommandHandler(ToggleDefaultAtisCommand, ToggleDefaultAtisCommandHandler, 0, 0);
 		// XPLMUnregisterCommandHandler(ToggleTcasCommand, ToggleTcasCommandHandler, 0, 0);
+		Log("XPluginStop");
 	}
 	catch (const std::exception& e)
 	{

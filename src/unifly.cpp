@@ -40,7 +40,7 @@ namespace unifly
 
         XPMPModels = XPMPGetNumberOfInstalledModels();
 
-        m_keepSocketAlive = true;
+        m_keepSocketAlive.store(true);
         m_socketThread = std::make_unique<std::thread>(&UniFly::SocketWorker, this);
     }
 
@@ -48,7 +48,7 @@ namespace unifly
     {
         //TODO: Shutdown message on the socket?
 
-        m_keepSocketAlive = false;
+        m_keepSocketAlive.store(false);
 
         if (m_socketThread) {
             m_socketThread->join();
@@ -108,6 +108,11 @@ namespace unifly
 			instance->m_aiControlled = XPMPHasControlOfAIAircraft();
 			instance->m_aircraftCount = XPMPCountPlanes();
 			// UpdateMenuItems();
+
+
+			unifly::schema::XPLMMessage open_msg;
+            unifly::schema::EventFrame* open = open_msg.mutable_event_frame();
+            instance->send_msg(open_msg);
 		}
 		return -1.0;
 	}
@@ -117,32 +122,51 @@ namespace unifly
     	try {
             asio::io_context io;
             tcp::acceptor acceptor(io, tcp::endpoint(tcp::v4(), XPLM_PORT));
+            acceptor.non_blocking(true);
+            Log("Waiting for connection...");
 
-            while (m_keepSocketAlive)
-                {
-                tcp::socket socket(io);
+            while (m_keepSocketAlive.load())
+            {
+                // Log("a");
+                auto socket = std::make_shared<tcp::socket>(io);
+                asio::error_code ec;
+                // Log("b");
+                acceptor.accept(*socket, ec);
+                // Log("c");
 
-                Log("Waiting for connection...");
-                acceptor.accept(socket);
+                if (ec == asio::error::would_block) {
+                    // Log("d");
+                    // No connection yet, sleep briefly
+                    // We don't want accept() blocking when m_keepSocketAlive has been set to false
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    // Log("e");
+                    continue;
+                } else if (ec) {
+                    // Log("f");
+                    Log("Accept failed: &s", ec.message().c_str());
+                    continue;
+                }
 
                 Log("Client connected\n");
+                m_socket = socket;
 
                 try {
-                    unifly::schema::XPLMMessage open_msg;
-                    unifly::schema::Open* open = open_msg.mutable_open();
-                    open->set_version_xplm(XPLMVersion);
-                    open->set_version_xplane(XPlaneVersion);
-                    open->set_version_plugin(PLUGIN_VERSION);
-                    open->set_models(XPMPModels);
+                    // Send Open
+                    QueueCallback([=] {
+                        unifly::schema::XPLMMessage open_msg;
+                        unifly::schema::EventOpen* open = open_msg.mutable_event_open();
+                        open->set_version_xplm(XPLMVersion);
+                        open->set_version_xplane(XPlaneVersion);
+                        open->set_version_plugin(PLUGIN_VERSION);
+                        open->set_models(XPMPModels);
 
-                    if(!send_message(socket, open_msg)) {
-                        Log("Failed to send Open message");
-                        break;
-                    }
+                        send_msg(open_msg);
+                    });
 
-                    while (true) {
+                    // Read
+                    while (m_keepSocketAlive.load()) {
                         unifly::schema::XPlaneMessage message;
-                        if (!recv_message(socket, &message)) {
+                        if (!recv_message(*socket, &message)) {
                             Log("Failed to receive message or client disconnected");
                             break;
                         }
@@ -150,6 +174,8 @@ namespace unifly
                         ProcessPacket(message);
                         //TODO: Is there a buffer for us to free here? idk
                     }
+
+                    m_socket = nullptr;
                 } catch (std::exception& e) {
                     Log("UniFly: Connection closed", e.what());
                 }
@@ -230,7 +256,7 @@ namespace unifly
 			auto err = XPMPMultiplayerEnable(callbackRequestTcasAgain);
 			if (*err)
 			{
-				Log("UniFly:", err);
+				Log("", err);
 			}
 		}
 	}
@@ -240,7 +266,7 @@ namespace unifly
 		if (XPMPHasControlOfAIAircraft())
 		{
 			XPMPMultiplayerDisable();
-			Log("UniFly: xPilot has released TCAS control");
+			Log("xPilot has released TCAS control");
 		}
 	}
 
