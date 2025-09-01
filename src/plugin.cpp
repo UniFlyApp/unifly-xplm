@@ -16,11 +16,11 @@ PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescript
 	{
 		XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
 		XPMPSetPluginName("UniFly");
-		Log("UniFly: XPluginStart");
+		Log("XPluginStart");
 	}
 	catch (const std::exception& e)
 	{
-		Log("UniFly: Exception in XPluginStart: %s", e.what());
+		Log("Exception in XPluginStart: %s", e.what());
 		return 0;
 	}
 	catch (...)
@@ -40,11 +40,11 @@ PLUGIN_API int XPluginEnable(void)
 			environment.reset();
 		}
 		environment = std::make_unique<unifly::UniFly>();
-		Log("UniFly: XPluginEnable");
+		Log("XPluginEnable");
 	}
 	catch (std::exception& e)
 	{
-		Log("UniFly: Exception in XPluginEnable: %s", e.what());
+		Log("Exception in XPluginEnable: %s", e.what());
 		return 0;
 	}
 	catch (...)
@@ -64,11 +64,11 @@ PLUGIN_API void XPluginDisable(void)
 		environment.reset();
 		XPMPMultiplayerDisable();
 		XPMPMultiplayerCleanup();
-		Log("UniFly: XPluginDisable");
+		Log("XPluginDisable");
 	}
 	catch (std::exception& e)
 	{
-		Log("UniFly: Exception in XPluginDisable: %s", e.what());
+		Log("Exception in XPluginDisable: %s", e.what());
 	}
 	catch (...)
 	{

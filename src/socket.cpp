@@ -44,8 +44,6 @@ bool recv_message(tcp::socket& socket, unifly::schema::XPlaneMessage* message) {
         return false;
     }
 
-    Log("a");
-
     asio::error_code ec;
 
     // Read little endian u16 length prefix
@@ -56,12 +54,8 @@ bool recv_message(tcp::socket& socket, unifly::schema::XPlaneMessage* message) {
         return false;
     }
 
-    Log("b");
-
     uint16_t message_length = 0;
     google::protobuf::io::CodedInputStream::ReadLittleEndian16FromArray(prefix_buf, &message_length);
-
-    Log("c %i", message_length);
 
     if (message_length == 0 || message_length > 65535) {
         Log("recv_message: Invalid message length %i", message_length);
@@ -76,20 +70,11 @@ bool recv_message(tcp::socket& socket, unifly::schema::XPlaneMessage* message) {
         return false;
     }
 
-    Log("body_read %i", body_read);
-
-    // print_buffer(buffer.data())
-
-    message->DebugString().c_str();
-
-    Log("dddd %s", message->DebugString().c_str());
-
     // Parse buffer
     if (!message->ParseFromArray(buffer.data(), message_length)) {
         Log("recv_message: Deserialization failed %s", ec.message().c_str());
         return false;
     }
-    Log("e");
 
     return true;
 }

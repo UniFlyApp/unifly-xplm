@@ -1,8 +1,11 @@
 #include "unifly.h"
+#include "aircraft_manager.h"
 #include "data_ref_access.h"
+#include "message.pb.h"
 #include "utilities.h"
 #include "socket.h"
 
+#include "XPLMUtilities.h"
 #include "XPMPMultiplayer.h"
 
 using asio::ip::tcp;
@@ -16,6 +19,9 @@ namespace unifly
         m_aiControlled("unifly/ai_controlled", ReadOnly),
         m_aircraftCount("unifly/num_aircraft", ReadOnly)
     {
+        m_aircraftManager = std::make_unique<AircraftManager>(this);
+
+        XPLMGetVersions(&XPlaneVersion, &XPLMVersion, &HostID);
         XPLMRegisterFlightLoopCallback(DeferredStartup, -1.0f, this);
     }
 
@@ -31,6 +37,8 @@ namespace unifly
         InitializeXPMP();
         TryGetTcasControl();
         XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
+
+        XPMPModels = XPMPGetNumberOfInstalledModels();
 
         m_keepSocketAlive = true;
         m_socketThread = std::make_unique<std::thread>(&UniFly::SocketWorker, this);
@@ -74,6 +82,7 @@ namespace unifly
             return false;
         }
 
+        // TODO: check these
     	// XPMPEnableAircraftLabels(Config::GetInstance().GetShowHideLabels());
     	// XPMPSetAircraftLabelDist(Config::GetInstance().GetMaxLabelDistance(), Config::GetInstance().GetLabelCutoffVis());
     	// XPMPSetAudioDevice(Config::GetInstance().GetAudioDevice());
@@ -119,6 +128,18 @@ namespace unifly
                 Log("Client connected\n");
 
                 try {
+                    unifly::schema::XPLMMessage open_msg;
+                    unifly::schema::Open* open = open_msg.mutable_open();
+                    open->set_version_xplm(XPLMVersion);
+                    open->set_version_xplane(XPlaneVersion);
+                    open->set_version_plugin(PLUGIN_VERSION);
+                    open->set_models(XPMPModels);
+
+                    if(!send_message(socket, open_msg)) {
+                        Log("Failed to send Open message");
+                        break;
+                    }
+
                     while (true) {
                         unifly::schema::XPlaneMessage message;
                         if (!recv_message(socket, &message)) {
@@ -126,18 +147,8 @@ namespace unifly
                             break;
                         }
 
-                        Log("UniFly: Received message");
-
-                        unifly::schema::XPLMMessage res;
-                        unifly::schema::ReadLocalFrequent* freq = res.mutable_read_local_frequent();
-                        freq->set_lat(255.0);
-
-                        Log("UniFly: Return message");
-
-                        if (!send_message(socket, res)) {
-                            Log("UniFly: Failed to send message or client disconnected");
-                            break;
-                        }
+                        ProcessPacket(message);
+                        //TODO: Is there a buffer for us to free here? idk
                     }
                 } catch (std::exception& e) {
                     Log("UniFly: Connection closed", e.what());
@@ -146,31 +157,44 @@ namespace unifly
         } catch (std::exception& e) {
             Log("UniFly: Fatal error in socket", e.what());
         }
+	}
 
-		// while (m_keepSocketAlive)
-		// {
-		// 	char* buffer;
-		// 	size_t bufferLen;
+	void UniFly::ProcessPacket(const unifly::schema::XPlaneMessage msg)
+	{
+	    switch (msg.kind_case()) {
+			case unifly::schema::XPlaneMessage::kRemoteSpawn: {
+				QueueCallback([msg = std::move(msg), this]() mutable
+				{
+				    m_aircraftManager->HandleSpawn(msg.remote_spawn());
+				});
 
-		// 	int err;
-		// 	err = nng_recv(m_socket, &buffer, &bufferLen, NNG_FLAG_ALLOC);
-
-		// 	if (err == 0)
-		// 	{
-			    // Log("UniFly received message of %s bytes", bufferLen);
-		// 		// BaseDto dto;
-		// 		// auto obj = msgpack::unpack(reinterpret_cast<const char*>(buffer), bufferLen);
-
-		// 		// try
-		// 		// {
-		// 		// 	obj.get().convert(dto);
-		// 		// 	ProcessPacket(dto);
-		// 		// }
-		// 		// catch (const msgpack::type_error& e) {}
-
-		// 		// nng_free(buffer, bufferLen);
-		// 	}
-		// }
+			    break;
+			}
+			case unifly::schema::XPlaneMessage::kRemoteDespawn: {
+				QueueCallback([msg = std::move(msg), this]() mutable
+				{
+				    m_aircraftManager->HandleDespawn(msg.remote_despawn());
+				});
+			    break;
+			}
+			case unifly::schema::XPlaneMessage::kRemoteReportPosition: {
+				QueueCallback([msg = std::move(msg), this]() mutable
+				{
+				    m_aircraftManager->HandleReportPosition(msg.remote_report_position());
+				});
+				break;
+			}
+			case unifly::schema::XPlaneMessage::kRemoteReportContext: {
+				QueueCallback([msg = std::move(msg), this]() mutable
+				{
+				    m_aircraftManager->HandleReportContext(msg.remote_report_context());
+				});
+				break;
+			}
+			case unifly::schema::XPlaneMessage::KIND_NOT_SET: {
+			    break;
+			}
+		}
 	}
 
 	void UniFly::QueueCallback(const std::function<void()>& cb)
