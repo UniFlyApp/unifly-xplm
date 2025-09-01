@@ -78,7 +78,7 @@ bool recv_message(tcp::socket& socket, unifly::schema::XPlaneMessage* message) {
 
     Log("body_read %i", body_read);
 
-    print_buffer(buffer.data())
+    // print_buffer(buffer.data())
 
     message->DebugString().c_str();
 

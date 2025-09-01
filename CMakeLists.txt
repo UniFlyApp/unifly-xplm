@@ -20,12 +20,18 @@ include_directories(${CMAKE_SOURCE_DIR}/inc)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
 
-# Protobuffers
-find_package(Protobuf CONFIG REQUIRED)
-message("PROTO VESRION = ${Protobuf_VERSION}")
+# Protobuf paths
+set(Protobuf_INCLUDE_DIR "${ARCH_ROOT}/include")
+set(Protobuf_LIBRARY "${ARCH_ROOT}/lib/libprotobuf.dylib")
+set(Protobuf_PROTOC_EXECUTABLE "${ARCH_ROOT}/bin/protoc")
+find_package(Protobuf CONFIG)
+
+message(STATUS "Protobuf include dirs: ${Protobuf_INCLUDE_DIRS}")
+message(STATUS "Protobuf libraries: ${Protobuf_LIBRARIES}")
 
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_SOURCE_DIR})
 
 file(
     REAL_PATH
