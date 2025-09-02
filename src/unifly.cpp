@@ -2,6 +2,7 @@
 #include "aircraft_manager.h"
 #include "data_ref_access.h"
 #include "message.pb.h"
+#include "pilot_local.pb.h"
 #include "utilities.h"
 #include "socket.h"
 
@@ -17,7 +18,26 @@ namespace unifly
 {
     UniFly::UniFly() :
         m_aiControlled("unifly/ai_controlled", ReadOnly),
-        m_aircraftCount("unifly/num_aircraft", ReadOnly)
+        m_aircraftCount("unifly/num_aircraft", ReadOnly),
+        m_beaconLights("sim/cockpit2/switches/beacon_on", ReadOnly),
+        m_landingLights("sim/cockpit2/switches/landing_lights_on", ReadOnly),
+        m_taxiLights("sim/cockpit2/switches/taxi_light_on", ReadOnly),
+        m_navLights("sim/cockpit2/switches/navigation_lights_on", ReadOnly),
+        m_strobeLights("sim/cockpit2/switches/strobe_lights_on", ReadOnly),
+        m_latitude("sim/flightmodel/position/latitude", ReadOnly),
+        m_longitude("sim/flightmodel/position/longitude", ReadOnly),
+        m_altitudeMsl("sim/flightmodel/position/elevation", ReadOnly),
+        m_pitch("sim/flightmodel/position/theta", ReadOnly),
+        m_heading("sim/flightmodel/position/psi", ReadOnly),
+        m_bank("sim/flightmodel/position/phi", ReadOnly),
+        m_altitudeAgl("sim/flightmodel/position/y_agl", ReadOnly),
+        m_altitudeStd("sim/flightmodel2/position/pressure_altitude", ReadOnly),
+        m_groundSpeed("sim/flightmodel/position/groundspeed", ReadOnly),
+        m_verticalSpeed("sim/flightmodel/position/vh_ind_fpm", ReadOnly),
+        m_onGround("sim/flightmodel/failures/onground_any", ReadOnly),
+        m_gearDown("sim/cockpit/switches/gear_handle_status", ReadOnly),
+        m_flapRatio("sim/flightmodel/controls/flaprat", ReadOnly),
+        m_speedbrakeRatio("sim/cockpit2/controls/speedbrake_ratio", ReadOnly)
     {
         m_aircraftManager = std::make_unique<AircraftManager>(this);
 
@@ -46,12 +66,12 @@ namespace unifly
 
     void UniFly::Shutdown()
     {
-        //TODO: Shutdown message on the socket?
-
         m_keepSocketAlive.store(false);
 
         if (m_socketThread) {
+            Log("joining socket thread");
             m_socketThread->join();
+            Log("joined socket thread");
         }
     }
 
@@ -98,8 +118,7 @@ namespace unifly
 		return 0;
 	}
 
-
-	float UniFly::MainFlightLoop(float inElapsedSinceLastCall, float, int, void* ref)
+	float UniFly::MainFlightLoop(float inElapsedSinceLastCall, float, int inCounter, void* ref)
 	{
 		auto* instance = static_cast<UniFly*>(ref);
 		if (instance)
@@ -109,10 +128,33 @@ namespace unifly
 			instance->m_aircraftCount = XPMPCountPlanes();
 			// UpdateMenuItems();
 
+			// Send event frame
+			unifly::schema::XPLMMessage event_frame_message;
+            unifly::schema::EventFrame* event_frame = event_frame_message.mutable_event_frame();
+            event_frame->set_counter(inCounter);
+            instance->send_msg(event_frame_message);
 
-			unifly::schema::XPLMMessage open_msg;
-            unifly::schema::EventFrame* open = open_msg.mutable_event_frame();
-            instance->send_msg(open_msg);
+            // Send local aircraft frequent
+            unifly::schema::XPLMMessage read_frequent_message;
+            unifly::schema::LocalReadFrequent* read_frequent = read_frequent_message.mutable_local_read_frequent();
+            read_frequent->set_lat(instance->m_latitude);
+            read_frequent->set_lon(instance->m_longitude);
+            read_frequent->set_pitch(instance->m_pitch);
+            read_frequent->set_bank(instance->m_bank);
+            read_frequent->set_heading(instance->m_heading);
+
+            read_frequent->set_ground_speed(instance->m_groundSpeed);
+            read_frequent->set_vertical_speed(instance->m_verticalSpeed);
+            read_frequent->set_on_ground(instance->m_onGround);
+
+            read_frequent->set_alt_msl(instance->m_altitudeMsl);
+            read_frequent->set_alt_agl(instance->m_altitudeAgl);
+            read_frequent->set_alt_std(instance->m_altitudeStd);
+            read_frequent->set_alt_cal(0.0);
+
+            read_frequent->set_cg_height(0.0);
+            instance->send_msg(read_frequent_message);
+
 		}
 		return -1.0;
 	}
@@ -127,22 +169,16 @@ namespace unifly
 
             while (m_keepSocketAlive.load())
             {
-                // Log("a");
                 auto socket = std::make_shared<tcp::socket>(io);
                 asio::error_code ec;
-                // Log("b");
                 acceptor.accept(*socket, ec);
-                // Log("c");
 
                 if (ec == asio::error::would_block) {
-                    // Log("d");
                     // No connection yet, sleep briefly
                     // We don't want accept() blocking when m_keepSocketAlive has been set to false
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                    // Log("e");
                     continue;
                 } else if (ec) {
-                    // Log("f");
                     Log("Accept failed: &s", ec.message().c_str());
                     continue;
                 }
