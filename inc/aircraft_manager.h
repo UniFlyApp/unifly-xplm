@@ -21,10 +21,22 @@
 #include "network_aircraft.h"
 #include "pilot_remote.pb.h"
 #include "unifly.h"
+#include <memory>
 
 namespace unifly
 {
+    typedef std::map<int, std::unique_ptr<NetworkAircraft>> mapPlanesTy;
+    extern mapPlanesTy mapPlanes;
 
+    inline mapPlanesTy::iterator magGetNextAircraft(mapPlanesTy::iterator iter)
+    {
+        return std::find_if(std::next(iter), mapPlanes.end(), [](const mapPlanesTy::value_type& p)
+            {
+                return p.second.get();
+            });
+    }
+
+    // mapPlanesTy::iterator mapGetAircraftByIndex(int idx);
 
     class AircraftManager
     {
@@ -33,11 +45,12 @@ namespace unifly
         virtual ~AircraftManager();
 
         void HandleSpawn(const unifly::schema::RemoteSpawn& remote_spawn);
-        void HandleDespawn(const unifly::schema::RemoteDespawn& remote_despawn);
+        void HandleDespawn(const int peer_id);
         void HandleReportPosition(const unifly::schema::RemoteReportPosition& remote_report_position);
         void HandleReportContext(const unifly::schema::RemoteReportContext& remote_report_context);
 
     private:
+        NetworkAircraft* GetAircraft(const int peer_id);
 
         static float AircraftMaintenanceCallback(float, float, int, void* ref);
         static void AircraftNotifierCallback(XPMPPlaneID inPlaneID, XPMPPlaneNotification inNotification, void* ref);

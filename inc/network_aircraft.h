@@ -23,14 +23,38 @@
 
 namespace unifly
 {
+    struct AircraftVisualState
+    {
+        double lat;
+        double lon;
+        double alt_msl;
+        double alt_agl;
+        double pitch;
+        double bank;
+        double heading;
+    };
+
 
     class NetworkAircraft : public XPMP2::Aircraft
     {
 
     public:
-        NetworkAircraft();
+        NetworkAircraft(
+            const int peer_id,
+            const AircraftVisualState& _visualState,
+            const std::string& _callsign,
+            const std::string& _icaoType,
+      		const std::string& _icaoAirline,
+      		const std::string& _livery,
+            XPMPPlaneID _modeS_id,
+    		const std::string& _modelName
+        );
 
+        XPMPPlaneSurfaces_t surfaces;
+        AircraftVisualState visual_state;
 
+    protected:
+        virtual void UpdatePosition(float, int) override;
 
     };
 

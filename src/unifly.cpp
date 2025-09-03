@@ -235,7 +235,7 @@ namespace unifly
 			case unifly::schema::XPlaneMessage::kRemoteDespawn: {
 				QueueCallback([msg = std::move(msg), this]() mutable
 				{
-				    m_aircraftManager->HandleDespawn(msg.remote_despawn());
+				    m_aircraftManager->HandleDespawn(msg.remote_despawn().peer_id());
 				});
 			    break;
 			}

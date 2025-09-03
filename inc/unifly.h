@@ -27,6 +27,19 @@ namespace unifly
 		void AircraftAdded(const std::string& callsign);
 		void DeleteAllAircraft();
 
+
+		/// All sending is allocated to occur on the xplane thread
+		template<class T>
+		void send_msg(const T& msg)
+		{
+		    if(m_socket) {
+				if (!send_message(*m_socket, msg)) {
+    				Log("failed to send a message");
+    				m_keepSocketAlive = false;
+    			}
+			}
+		}
+
 	protected:
 
 	    OwnedDataRef<int> m_aiControlled;
@@ -73,19 +86,6 @@ namespace unifly
 		void QueueCallback(const std::function<void()>& cb);
 
 		std::unique_ptr<AircraftManager> m_aircraftManager;
-
-		/// All sending is allocated to occur on the xplane thread
-		template<class T>
-		void send_msg(const T& msg)
-		{
-		    if(m_socket) {
-				if (!send_message(*m_socket, msg)) {
-    				Log("failed to send a message");
-    				m_keepSocketAlive = false;
-    			}
-			}
-		}
-
     };
 
 };

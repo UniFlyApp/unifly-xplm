@@ -17,12 +17,17 @@
 */
 
 #include "aircraft_manager.h"
+#include "XPMPAircraft.h"
+#include "XPMPMultiplayer.h"
+#include "network_aircraft.h"
 #include "pilot_remote.pb.h"
 #include "unifly.h"
 #include "utilities.h"
 
 namespace unifly
 {
+    mapPlanesTy mapPlanes;
+
     AircraftManager::AircraftManager(UniFly* instance) :
         mEnv(instance)
     {
@@ -39,22 +44,62 @@ namespace unifly
 
     void AircraftManager::HandleSpawn(const unifly::schema::RemoteSpawn& remote_spawn)
     {
-        Log("handle spawn", remote_spawn.peer_id());
-        // auto planeIter = mapPlanes.find()
+        const int peer_id = remote_spawn.peer_id();
+        Log("handle spawn %u", peer_id);
+
+        auto planeIt = mapPlanes.find(peer_id);
+        if (planeIt != mapPlanes.end()) {
+            // Remove the plane
+            HandleDespawn(peer_id);
+            return;
+        }
+
+        const std::string& callsign = "JBU257";
+        const std::string& airline = "JBU";
+        const std::string& aircraft = "A32N";
+
+        AircraftVisualState visual_state{};
+        visual_state.lat = remote_spawn.lat();
+        visual_state.lon = remote_spawn.lon();
+        visual_state.pitch = remote_spawn.pitch();
+        visual_state.bank = remote_spawn.bank();
+        visual_state.heading = remote_spawn.heading();
+        // visual_state.alt_msl = remote_spawn.alt_msl();
+        // visual_state.alt_agl = remote_spawn.alt_agl();
+
+        NetworkAircraft* plane = new NetworkAircraft(peer_id, visual_state, callsign, aircraft, airline, "", 0, "");
+        mapPlanes.emplace(peer_id, std::move(plane));
     }
 
-    void AircraftManager::HandleDespawn(const unifly::schema::RemoteDespawn& remote_despawn)
+    void AircraftManager::HandleDespawn(const int peer_id)
     {
-
     }
 
     void AircraftManager::HandleReportPosition(const unifly::schema::RemoteReportPosition& remote_report_position)
     {
+        const int peer_id = remote_report_position.peer_id();
+        auto aircraft = GetAircraft(peer_id);
+        if (!aircraft) return;
+
+        aircraft->visual_state.lat = remote_report_position.lat();
+        aircraft->visual_state.lon = remote_report_position.lon();
+        aircraft->visual_state.pitch = remote_report_position.pitch();
+        aircraft->visual_state.bank = remote_report_position.bank();
+        aircraft->visual_state.heading = remote_report_position.heading();
     }
 
     void AircraftManager::HandleReportContext(const unifly::schema::RemoteReportContext& remote_report_context)
     {
-        Log("handle report context %u", remote_report_context.peer_id());
+        const int peer_id = remote_report_context.peer_id();
+        auto aircraft = GetAircraft(peer_id);
+        if (!aircraft) return;
+    }
+
+    NetworkAircraft* AircraftManager::GetAircraft(const int peer_id)
+    {
+        auto planeIt = mapPlanes.find(peer_id);
+        if (planeIt == mapPlanes.end()) return nullptr;
+        return planeIt->second.get();
     }
 
     float AircraftManager::AircraftMaintenanceCallback(float, float inElapsedTimeSinceLastFlightLoop, int, void* ref)
@@ -64,7 +109,35 @@ namespace unifly
 
     void AircraftManager::AircraftNotifierCallback(XPMPPlaneID inPlaneID, XPMPPlaneNotification inNotification, void* ref)
     {
+        auto* instance = static_cast<AircraftManager*>(ref);
+        if (instance)
+        {
+            XPMP2::Aircraft* pAc = XPMP2::AcFindByID(inPlaneID);
+            if (pAc)
+            {
+                unifly::schema::XPLMMessage message;
+                if (inNotification == xpmp_PlaneNotification_Created)
+                {
+                    unifly::schema::RemoteSpawned* remote_spawned = message.mutable_remote_spawned();
 
+                    // pAc->
+                    // remote_spawned->set_peer_id(peer)
+
+                }
+                else if (inNotification == xpmp_PlaneNotification_Destroyed)
+                {
+                    unifly::schema::RemoteDespawned* remote_spawned = message.mutable_remote_despawned();
+
+                }
+                else if (inNotification == xpmp_PlaneNotification_ModelChanged)
+                {
+                    // unifly::schema::RemoteDespawned* remote_spawned = message.mutable_remote_despawned();
+                    //TODO!
+                }
+
+                instance->mEnv->send_msg(message);
+            }
+        }
     }
 
 }
