@@ -34,24 +34,30 @@ namespace unifly
         double heading;
     };
 
+	inline float RpmToDegree(float rpm, double s)
+	{
+		return rpm / 60.0f * float(s) * 360.0f;
+	}
 
     class NetworkAircraft : public XPMP2::Aircraft
     {
 
     public:
         NetworkAircraft(
-            const int peer_id,
+            const int _peer_id,
             const AircraftVisualState& _visualState,
             const std::string& _callsign,
             const std::string& _icaoType,
       		const std::string& _icaoAirline,
       		const std::string& _livery,
-            XPMPPlaneID _modeS_id,
     		const std::string& _modelName
         );
 
+        const int peer_id;
+
         XPMPPlaneSurfaces_t surfaces;
         AircraftVisualState visual_state;
+        bool engines;
 
     protected:
         virtual void UpdatePosition(float, int) override;

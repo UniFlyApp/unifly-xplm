@@ -17,6 +17,7 @@
 */
 
 #include "network_aircraft.h"
+#include "utilities.h"
 
 namespace unifly
 {
@@ -27,11 +28,26 @@ namespace unifly
         const std::string& _icaoType,
 		const std::string& _icaoAirline,
 		const std::string& _livery,
-		XPMPPlaneID _modeS_id = 0,
 		const std::string& _modelName = ""
-    ) : XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, _modeS_id, _modelName)
+    ) : XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, peer_id, _modelName),
+        peer_id(peer_id)
     {
-        visual_state = _visualState;
+        strScpy(acInfoTexts.tailNum, _callsign.c_str(), sizeof(acInfoTexts.tailNum));
+		strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
+		strScpy(acInfoTexts.icaoAirline, acIcaoAirline.c_str(), sizeof(acInfoTexts.icaoAirline));
+
+		SetVisible(true);
+		SetLocation(_visualState.lat, _visualState.lon, _visualState.alt_msl);
+		SetHeading(_visualState.heading);
+		SetPitch(_visualState.pitch);
+		SetRoll(_visualState.bank);
+
+		label = "XPMP2::Aircraft";
+        colLabel[0] = 0.0f;             // green
+        colLabel[1] = 1.0f;
+        colLabel[2] = 0.0f;
+
+		visual_state = _visualState;
     }
 
 
@@ -46,6 +62,28 @@ namespace unifly
         SetRoll(visual_state.bank);
         SetHeading(visual_state.heading);
         SetOnGrnd(true);
+
+
+        if (engines) {
+            SetEngineRotRpm(1200);
+            SetPropRotRpm(GetEngineRotRpm());
+            SetEngineRotAngle(GetEngineRotAngle() + RpmToDegree(GetEngineRotRpm(), _frameRatePeriod));
+			while (GetEngineRotAngle() >= 360.0f)
+			{
+				SetEngineRotAngle(GetEngineRotAngle() - 360.0f);
+			}
+			SetPropRotAngle(GetEngineRotAngle());
+			SetThrustRatio(1.0f);
+        }
+        else
+		{
+			SetEngineRotRpm(0.0f);
+			SetPropRotRpm(0.0f);
+			SetEngineRotAngle(0.0f);
+			SetPropRotAngle(0.0f);
+			SetThrustRatio(0.0f);
+		}
+
     }
 
 }

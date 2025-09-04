@@ -77,8 +77,11 @@ namespace unifly
 
     int CBIntPrefsFunc(const char*, [[maybe_unused]] const char* item, int defaultVal)
 	{
+        if (!strcmp(item, XPMP_CFG_ITM_HANDLE_DUP_ID))
+            // If an XPMPPlaneId is not unique, throw an error rather than blindly choosing a new one
+            return false;
 		if (!strcmp(item, XPMP_CFG_ITM_CLAMPALL))
-			return 0;
+			return true;
 		return defaultVal;
 	}
 

@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "XPMPMultiplayer.h"
 #include "network_aircraft.h"
 #include "pilot_remote.pb.h"
 #include "unifly.h"
@@ -25,18 +26,8 @@
 
 namespace unifly
 {
-    typedef std::map<int, std::unique_ptr<NetworkAircraft>> mapPlanesTy;
+    typedef std::map<XPMPPlaneID, std::unique_ptr<NetworkAircraft>> mapPlanesTy;
     extern mapPlanesTy mapPlanes;
-
-    inline mapPlanesTy::iterator magGetNextAircraft(mapPlanesTy::iterator iter)
-    {
-        return std::find_if(std::next(iter), mapPlanes.end(), [](const mapPlanesTy::value_type& p)
-            {
-                return p.second.get();
-            });
-    }
-
-    // mapPlanesTy::iterator mapGetAircraftByIndex(int idx);
 
     class AircraftManager
     {
