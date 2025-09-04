@@ -27,6 +27,8 @@ namespace unifly
 		void AircraftAdded(const std::string& callsign);
 		void DeleteAllAircraft();
 
+		double GetAltitudeStd();
+		bool IsXplane12();
 
 		/// All sending is allocated to occur on the xplane thread
 		template<class T>
@@ -62,11 +64,9 @@ namespace unifly
         DataRefAccess<double> m_altitudeAglM;
         /// User airplane altitude as pressure altitude in standard atmosphere
         DataRefAccess<double> m_altitudeStd;
+
         DataRefAccess<double> m_altitudeTemperatureEffect;
-
-
-
-
+        DataRefAccess<double> m_barometerSeaLevel;
 
         DataRefAccess<double> m_groundSpeed;
         DataRefAccess<double> m_verticalSpeed;

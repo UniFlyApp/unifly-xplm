@@ -35,7 +35,9 @@ namespace unifly
         m_altitudeMslM("sim/flightmodel/position/elevation", ReadOnly),
         m_altitudeAglM("sim/flightmodel/position/y_agl", ReadOnly),
         m_altitudeStd("sim/flightmodel2/position/pressure_altitude", ReadOnly),
+
         m_altitudeTemperatureEffect("sim/weather/aircraft/altimeter_temperature_error", ReadOnly),
+        m_barometerSeaLevel("sim/weather/barometer_sealevel_inhg", ReadOnly),
 
         m_groundSpeed("sim/flightmodel/position/groundspeed", ReadOnly),
         m_verticalSpeed("sim/flightmodel/position/vh_ind_fpm", ReadOnly),
@@ -157,11 +159,15 @@ namespace unifly
 
             double alt_msl = instance->m_altitudeMslM * 3.2808399; //meters to feet
             double alt_agl = instance->m_altitudeAglM * 3.2808399; //meters to feet
-            double alt_std = instance->m_altitudeStd;
+            double alt_std = instance->GetAltitudeStd();
             double alt_cal = alt_msl + instance->m_altitudeTemperatureEffect;
+            // True elevation above mean sea level
             read_frequent->set_alt_msl(alt_msl);
+            // True elevation above ground level
             read_frequent->set_alt_agl(alt_agl);
+            // Std pressure altimeter (29.92)
             read_frequent->set_alt_std(alt_std);
+            // Calibrated pressure altimter (local sea pressure)
             read_frequent->set_alt_cal(alt_cal);
 
             read_frequent->set_cg_height(0.0);
@@ -322,5 +328,20 @@ namespace unifly
 	{
 	    // TODO
 		// m_aircraftManager->RemoveAllPlanes();
+	}
+
+    double UniFly::GetAltitudeStd()
+    {
+        if(IsXplane12()) {
+            return m_altitudeStd;
+        }
+
+        const double deltaPressure = (1013.25 - m_barometerSeaLevel) * 30.0; // 30ft per mbar
+        return (m_altitudeMslM * 3.28084) + deltaPressure;
+    }
+
+	bool UniFly::IsXplane12()
+	{
+	    return XPlaneVersion >= 120000;
 	}
 }
