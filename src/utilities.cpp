@@ -36,12 +36,12 @@ inline const char* Logger(const char* msg, va_list args)
 	return buf;
 }
 
-// %d → signed decimal int
-// %u → unsigned int
-// %f → float/double
-// %s → C-string
-// %p → pointer
-// %x / %X → hex
+/// %d → signed decimal int
+/// %u → unsigned int
+/// %f → float/double
+/// %s → C-string
+/// %p → pointer
+/// %x / %X → hex
 void Log(const char* msg, ...)
 {
 	va_list args;

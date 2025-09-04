@@ -55,21 +55,21 @@ namespace unifly
 
         DataRefAccess<double> m_latitude;
         DataRefAccess<double> m_longitude;
-        DataRefAccess<double> m_pitch;
-        DataRefAccess<double> m_heading;
-        DataRefAccess<double> m_bank;
+        DataRefAccess<float> m_pitch;
+        DataRefAccess<float> m_heading;
+        DataRefAccess<float> m_bank;
 
         /// The elevation above MSL of the aircraft
         DataRefAccess<double> m_altitudeMslM;
-        DataRefAccess<double> m_altitudeAglM;
+        DataRefAccess<float> m_altitudeAglM;
         /// User airplane altitude as pressure altitude in standard atmosphere
         DataRefAccess<double> m_altitudeStd;
 
         DataRefAccess<double> m_altitudeTemperatureEffect;
-        DataRefAccess<double> m_barometerSeaLevel;
+        DataRefAccess<float> m_barometerSeaLevel;
 
-        DataRefAccess<double> m_groundSpeed;
-        DataRefAccess<double> m_verticalSpeed;
+        DataRefAccess<float> m_groundSpeed;
+        DataRefAccess<float> m_verticalSpeed;
         DataRefAccess<int> m_onGround;
         DataRefAccess<int> m_gearDown;
         DataRefAccess<float> m_flapRatio;

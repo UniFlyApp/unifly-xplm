@@ -93,37 +93,37 @@ void DataRefAccess<std::string>::unshareData() {
 template <>
 void DataRefAccess<int>::checkDataType() {
 	if (XPLMGetDataRefTypes(m_data_ref) != xplmType_Int)
-		throw IncompatibleTypeException(identifier_ + "declared to be int, but isn't.");
+		throw IncompatibleTypeException(identifier_ + " declared to be int, but isn't.");
 }
 
 template <>
 void DataRefAccess<float>::checkDataType() {
 	if (XPLMGetDataRefTypes(m_data_ref) != xplmType_Float)
-		throw IncompatibleTypeException(identifier_ + "declared to be float, but isn't.");
+		throw IncompatibleTypeException(identifier_ + " declared to be float, but isn't.");
 }
 
 template <>
 void DataRefAccess<double>::checkDataType() {
 	if (XPLMGetDataRefTypes(m_data_ref) != (xplmType_Float | xplmType_Double))
-		throw IncompatibleTypeException(identifier_ + "declared to be double, but isn't.");
+		throw IncompatibleTypeException(identifier_ + " declared to be double, but isn't.");
 }
 
 template <>
 void DataRefAccess<std::vector<float> >::checkDataType() {
 	if (XPLMGetDataRefTypes(m_data_ref) != xplmType_FloatArray)
-		throw IncompatibleTypeException(identifier_ + "declared to be a float array, but isn't.");
+		throw IncompatibleTypeException(identifier_ + " declared to be a float array, but isn't.");
 }
 
 template <>
 void DataRefAccess<std::vector<int> >::checkDataType() {
 	if (XPLMGetDataRefTypes(m_data_ref) != xplmType_IntArray)
-		throw IncompatibleTypeException(identifier_ + "declared to be a int array, but isn't.");
+		throw IncompatibleTypeException(identifier_ + " declared to be a int array, but isn't.");
 }
 
 template <>
 void DataRefAccess<std::string>::checkDataType() {
 	if (XPLMGetDataRefTypes(m_data_ref) != xplmType_Data)
-		throw IncompatibleTypeException(identifier_ + "declared to be a byte array, but isn't.");
+		throw IncompatibleTypeException(identifier_ + " declared to be a byte array, but isn't.");
 }
 
 template <>

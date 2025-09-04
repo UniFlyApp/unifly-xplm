@@ -29,6 +29,8 @@
 
 #pragma once
 
+#include "utilities.h"
+
 namespace unifly {
 	constexpr long DRE_MSG_ADD_DATAREF = 0x01000000;
 	const char* const DRE_PLUGIN_SINATURE = "xplanesdk.examples.DataRefEditor";
@@ -56,6 +58,7 @@ namespace unifly {
 	public:
 		LookupException(const std::string& msg) :
 			runtime_error(msg) {
+			Log("data_ref_access lookup exception: %s", msg.c_str());
 		}
 	};
 
