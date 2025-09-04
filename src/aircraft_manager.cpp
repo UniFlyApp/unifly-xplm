@@ -118,8 +118,28 @@ namespace unifly
         return planeIt->second.get();
     }
 
-    float AircraftManager::AircraftMaintenanceCallback(float, float inElapsedTimeSinceLastFlightLoop, int, void* ref)
+    float AircraftManager::AircraftMaintenanceCallback(float, float, int inCounter, void* ref)
     {
+        auto* instance = static_cast<AircraftManager*>(ref);
+        if (instance)
+        {
+            // Terrain reports
+            // Counter counts in twos
+            if (inCounter % (20 * 2) <= 1) {
+                for (const auto& plane: mapPlanes)
+                {
+                    double lat = plane.second->visual_state.lat;
+                    double lon = plane.second->visual_state.lon;
+                    double elevation = plane.second->terrain_probe.GetTerrainElevation(lat, lon);
+
+                    unifly::schema::XPLMMessage event_elevation_message;
+                    unifly::schema::RemoteReceiveElevation* event_elevation = event_elevation_message.mutable_remote_elevation();
+                    event_elevation->set_lat(lat);
+                    event_elevation->set_lon(lon);
+                    event_elevation->set_elevation(elevation);
+                }
+            }
+        }
         return -1.0f;
     }
 

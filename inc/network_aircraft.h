@@ -19,6 +19,7 @@
 #pragma once
 
 #include "XPMPAircraft.h"
+#include "terrain_probe.h"
 #define INCLUDE_FMOD_SOUND 1
 
 namespace unifly
@@ -55,7 +56,10 @@ namespace unifly
 
         const int peer_id;
 
-        XPMPPlaneSurfaces_t surfaces;
+        TerrainProbe terrain_probe;
+        double elevation_terrain;
+
+        // XPMPPlaneSurfaces_t surfaces;
         AircraftVisualState visual_state;
         bool engines;
 

@@ -74,6 +74,7 @@ set(INCLUDES
   inc/socket.h
   inc/aircraft_manager.h
   inc/network_aircraft.h
+  inc/terrain_probe.h
   inc/utilities.h
   inc/data_ref_owned.h
   inc/data_ref_access.h
@@ -90,6 +91,7 @@ set(SRC
   src/socket.cpp
   src/aircraft_manager.cpp
   src/network_aircraft.cpp
+  src/terrain_probe.cpp
   src/utilities.cpp
   src/data_ref_owned.cpp
   src/data_ref_access.cpp

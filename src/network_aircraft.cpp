@@ -63,7 +63,6 @@ namespace unifly
         SetHeading(visual_state.heading);
         SetOnGrnd(true);
 
-
         if (engines) {
             SetEngineRotRpm(1200);
             SetPropRotRpm(GetEngineRotRpm());
@@ -83,7 +82,6 @@ namespace unifly
 			SetPropRotAngle(0.0f);
 			SetThrustRatio(0.0f);
 		}
-
     }
 
 }
