@@ -100,8 +100,8 @@ namespace unifly
 
         aircraft->SetFlapRatio(remote_report_context.flaps());
         aircraft->SetSlatRatio(remote_report_context.flaps());
-        aircraft->SetSpoilerRatio(remote_report_context.spoilers() ? 1.0f : 0.0f);
-        aircraft->SetSpeedbrakeRatio(remote_report_context.spoilers() ? 1.0f : 0.0f);
+        aircraft->SetSpoilerRatio(remote_report_context.spoilers());
+        aircraft->SetSpeedbrakeRatio(remote_report_context.spoilers());
         aircraft->SetGearRatio(remote_report_context.gear() ? 1.0f : 0.0f); //TODO: Add || on ground once I verify that this doesn't need ! or summat
         aircraft->SetLightsStrobe(remote_report_context.lights_strobe());
         aircraft->SetLightsTaxi(remote_report_context.lights_taxi());

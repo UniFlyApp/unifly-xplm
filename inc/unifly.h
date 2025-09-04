@@ -45,20 +45,29 @@ namespace unifly
 	    OwnedDataRef<int> m_aiControlled;
 	    OwnedDataRef<int> m_aircraftCount;
 
-
         DataRefAccess<int> m_beaconLights;
         DataRefAccess<int> m_landingLights;
         DataRefAccess<int> m_taxiLights;
         DataRefAccess<int> m_navLights;
         DataRefAccess<int> m_strobeLights;
+
         DataRefAccess<double> m_latitude;
         DataRefAccess<double> m_longitude;
-        DataRefAccess<double> m_altitudeMsl;
         DataRefAccess<double> m_pitch;
         DataRefAccess<double> m_heading;
         DataRefAccess<double> m_bank;
-        DataRefAccess<double> m_altitudeAgl;
+
+        /// The elevation above MSL of the aircraft
+        DataRefAccess<double> m_altitudeMslM;
+        DataRefAccess<double> m_altitudeAglM;
+        /// User airplane altitude as pressure altitude in standard atmosphere
         DataRefAccess<double> m_altitudeStd;
+        DataRefAccess<double> m_altitudeTemperatureEffect;
+
+
+
+
+
         DataRefAccess<double> m_groundSpeed;
         DataRefAccess<double> m_verticalSpeed;
         DataRefAccess<int> m_onGround;

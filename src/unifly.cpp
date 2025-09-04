@@ -19,19 +19,24 @@ namespace unifly
     UniFly::UniFly() :
         m_aiControlled("unifly/ai_controlled", ReadOnly),
         m_aircraftCount("unifly/num_aircraft", ReadOnly),
+
         m_beaconLights("sim/cockpit2/switches/beacon_on", ReadOnly),
         m_landingLights("sim/cockpit2/switches/landing_lights_on", ReadOnly),
         m_taxiLights("sim/cockpit2/switches/taxi_light_on", ReadOnly),
         m_navLights("sim/cockpit2/switches/navigation_lights_on", ReadOnly),
         m_strobeLights("sim/cockpit2/switches/strobe_lights_on", ReadOnly),
+
         m_latitude("sim/flightmodel/position/latitude", ReadOnly),
         m_longitude("sim/flightmodel/position/longitude", ReadOnly),
-        m_altitudeMsl("sim/flightmodel/position/elevation", ReadOnly),
         m_pitch("sim/flightmodel/position/theta", ReadOnly),
-        m_heading("sim/flightmodel/position/psi", ReadOnly),
         m_bank("sim/flightmodel/position/phi", ReadOnly),
-        m_altitudeAgl("sim/flightmodel/position/y_agl", ReadOnly),
+        m_heading("sim/flightmodel/position/psi", ReadOnly),
+
+        m_altitudeMslM("sim/flightmodel/position/elevation", ReadOnly),
+        m_altitudeAglM("sim/flightmodel/position/y_agl", ReadOnly),
         m_altitudeStd("sim/flightmodel2/position/pressure_altitude", ReadOnly),
+        m_altitudeTemperatureEffect("sim/weather/aircraft/altimeter_temperature_error", ReadOnly),
+
         m_groundSpeed("sim/flightmodel/position/groundspeed", ReadOnly),
         m_verticalSpeed("sim/flightmodel/position/vh_ind_fpm", ReadOnly),
         m_onGround("sim/flightmodel/failures/onground_any", ReadOnly),
@@ -150,10 +155,14 @@ namespace unifly
             read_frequent->set_vertical_speed(instance->m_verticalSpeed);
             read_frequent->set_on_ground(instance->m_onGround);
 
-            read_frequent->set_alt_msl(instance->m_altitudeMsl);
-            read_frequent->set_alt_agl(instance->m_altitudeAgl);
-            read_frequent->set_alt_std(instance->m_altitudeStd);
-            read_frequent->set_alt_cal(0.0);
+            double alt_msl = instance->m_altitudeMslM * 3.2808399; //meters to feet
+            double alt_agl = instance->m_altitudeAglM * 3.2808399; //meters to feet
+            double alt_std = instance->m_altitudeStd;
+            double alt_cal = alt_msl + instance->m_altitudeTemperatureEffect;
+            read_frequent->set_alt_msl(alt_msl);
+            read_frequent->set_alt_agl(alt_agl);
+            read_frequent->set_alt_std(alt_std);
+            read_frequent->set_alt_cal(alt_cal);
 
             read_frequent->set_cg_height(0.0);
             instance->send_msg(read_frequent_message);
