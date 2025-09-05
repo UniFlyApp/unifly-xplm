@@ -18,9 +18,24 @@ jobs:
         with:
           submodules: recursive
 
+      - uses: actions/checkout@master
+        with:
+          repository: protocolbuffers/protobuf
+          path: "protobuf"
+
+      ### Buid Protocol buffers with cmake ###
+
+      - name: Build protocolbuffers
+        run: |
+          cd protobuf
+          cmake -S . -B build -DCMAKE_INSTALL_PREFIX=../install -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+          ctest --test-dir build --verbose
+          cmake --install build
+
       ### Buid Plugin ###
 
-      - name: Build
+      - name: Build plugin
         run: |
           mkdir build
           cmake "-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64" -B build -S . && cmake --build build
