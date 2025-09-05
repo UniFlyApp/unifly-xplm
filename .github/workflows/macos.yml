@@ -1,4 +1,4 @@
-name: "Build xPilot for macOS"
+name: "Build UniFly for macOS"
 
 on:
   workflow_call:
@@ -39,8 +39,8 @@ jobs:
       - name: Package plugin
         run: |
           mkdir -p ${{ github.workspace }}/UniFly/mac_x64
-          cp ${{ github.workspace }}/build/mac_x64/xPilot.xpl ${{ github.workspace }}/UniFly/mac_x64
-          cp -R ${{ github.workspace }}/build/mac_x64/xPilot.dSYM ${{ github.workspace }}/UniFly/mac_x64
+          cp ${{ github.workspace }}/build/mac_x64/UniFly-XPLM.xpl ${{ github.workspace }}/UniFly/mac_x64
+          cp -R ${{ github.workspace }}/build/mac_x64/UniFly-XPLM.dSYM ${{ github.workspace }}/UniFly/mac_x64
           cp ${{ github.workspace }}/3rdparty/fmod/libfmod.dylib ${{ github.workspace }}/UniFly/mac_x64
           cp -R ${{ github.workspace }}/Resources ${{ github.workspace }}/UniFly/
 
