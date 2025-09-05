@@ -35,7 +35,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 file(
     REAL_PATH
-    "${CMAKE_CURRENT_SOURCE_DIR}/../crates/sim-xplane-ipc/schema/"
+    "${CMAKE_CURRENT_SOURCE_DIR}/schema/"
     PROTO_IMPORT_DIR
 )
 message("PROTO SCHEMAS = ${PROTO_IMPORT_DIR}")

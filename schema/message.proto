@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package unifly.schema;
+
+import "pilot_local.proto";
+import "pilot_remote.proto";
+
+/// Sent from the UniFly app
+message XPlaneMessage {
+    oneof kind {
+        RemoteSpawn remote_spawn = 1;
+        RemoteDespawn remote_despawn = 2;
+
+        RemoteReportPosition remote_report_position = 3;
+        RemoteReportContext remote_report_context = 4;
+    }
+}
+
+/// Sent from the XPLM plugin
+message XPLMMessage {
+    oneof kind {
+        EventOpen event_open = 1;
+        EventFrame event_frame = 2;
+
+        RemoteSpawned remote_spawned = 3;
+        RemoteDespawned remote_despawned = 4;
+
+        RemoteReceiveModel remote_model = 5;
+        RemoteReceiveElevation remote_elevation = 6;
+
+        LocalReadFrequent local_read_frequent = 7;
+        LocalReadInfrequent local_read_infrequent = 8;
+    }
+}
+
+message EventOpen {
+    uint32 version_xplm = 1;
+    uint32 version_xplane = 2;
+    uint32 version_plugin = 3;
+    uint32 models = 4;
+}
+
+message EventFrame {
+    uint32 counter = 1;
+}
