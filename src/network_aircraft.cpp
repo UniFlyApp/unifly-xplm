@@ -61,7 +61,7 @@ namespace unifly
         SetPitch(visual_state.pitch);
         SetRoll(visual_state.bank);
         SetHeading(visual_state.heading);
-        SetOnGrnd(true);
+        // SetOnGrnd(true);
 
         if (engines) {
             SetEngineRotRpm(1200);

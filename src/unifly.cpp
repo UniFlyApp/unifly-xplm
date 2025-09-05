@@ -173,6 +173,23 @@ namespace unifly
             read_frequent->set_cg_height(0.0);
             instance->send_msg(read_frequent_message);
 
+            // Send local aircraft infrequent
+            // Counter counts in twos
+            if (inCounter % (90 * 2) <= 1) {
+                unifly::schema::XPLMMessage read_infrequent_message;
+                unifly::schema::LocalReadInfrequent* read_infrequent = read_infrequent_message.mutable_local_read_infrequent();
+                read_infrequent->set_lights_beacon(instance->m_beaconLights);
+                read_infrequent->set_lights_landing(instance->m_landingLights);
+                read_infrequent->set_lights_nav(instance->m_navLights);
+                read_infrequent->set_lights_strobe(instance->m_strobeLights);
+                read_infrequent->set_lights_taxi(instance->m_taxiLights);
+
+                read_infrequent->set_flaps(instance->m_flapRatio);
+                read_infrequent->set_spoilers(instance->m_speedbrakeRatio);
+                read_infrequent->set_gear_down(instance->m_gearDown);
+
+                instance->send_msg(read_infrequent_message);
+            }
 		}
 		return -1.0;
 	}
@@ -230,6 +247,11 @@ namespace unifly
                     }
 
                     m_socket = nullptr;
+
+                    // Despawn planes
+                    QueueCallback([=] {
+                        DeleteAllAircraft();
+                    });
                 } catch (std::exception& e) {
                     Log("UniFly: Connection closed", e.what());
                 }
@@ -326,8 +348,8 @@ namespace unifly
 
 	void UniFly::DeleteAllAircraft()
 	{
-	    // TODO
-		// m_aircraftManager->RemoveAllPlanes();
+
+		m_aircraftManager->DespawnAll();
 	}
 
     double UniFly::GetAltitudeStd()

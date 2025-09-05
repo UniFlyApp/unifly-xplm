@@ -79,6 +79,11 @@ namespace unifly
         mapPlanes.erase(peer_id);
     }
 
+    void AircraftManager::DespawnAll()
+    {
+        mapPlanes.clear();
+    }
+
     void AircraftManager::HandleReportPosition(const unifly::schema::RemoteReportPosition& remote_report_position)
     {
         const int peer_id = remote_report_position.peer_id();

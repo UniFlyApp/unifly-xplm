@@ -40,6 +40,8 @@ namespace unifly
         void HandleReportPosition(const unifly::schema::RemoteReportPosition& remote_report_position);
         void HandleReportContext(const unifly::schema::RemoteReportContext& remote_report_context);
 
+        void DespawnAll();
+
     private:
         NetworkAircraft* GetAircraft(const int peer_id);
 
