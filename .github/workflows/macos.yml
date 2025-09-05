@@ -23,7 +23,7 @@ jobs:
       - name: Build
         run: |
           mkdir build
-          cmake -B build -S . -DCMAKE_OSX_ARCHITECTURES "x86_64;arm64" && cmake --build build
+          cmake "-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64" -B build -S . && cmake --build build
 
       # - name: Build plugin
       #   working-directory: ${{ env.PLUGIN_DIR }}
