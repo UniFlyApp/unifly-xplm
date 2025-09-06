@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 project(UniFly-XPLM LANGUAGES C CXX)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD_REQUIRED 17)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
 
 set (INCLUDE_FMOD_SOUND 1)
 add_compile_definitions(INCLUDE_FMOD_SOUND=1)
@@ -21,10 +21,10 @@ include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
 
 # Protobuf paths
-set(Protobuf_INCLUDE_DIR "${ARCH_ROOT}/include")
-set(Protobuf_LIBRARY "${ARCH_ROOT}/lib/libprotobuf.dylib")
-set(Protobuf_PROTOC_EXECUTABLE "${ARCH_ROOT}/bin/protoc")
-find_package(Protobuf CONFIG)
+#set(Protobuf_INCLUDE_DIR "${ARCH_ROOT}/include")
+#set(Protobuf_LIBRARY "${ARCH_ROOT}/lib/libprotobuf.dylib")
+#set(Protobuf_PROTOC_EXECUTABLE "${ARCH_ROOT}/bin/protoc")
+find_package(Protobuf CONFIG REQUIRED)
 
 message(STATUS "Protobuf include dirs: ${Protobuf_INCLUDE_DIRS}")
 message(STATUS "Protobuf libraries: ${Protobuf_LIBRARIES}")
@@ -135,7 +135,7 @@ if (WIN32 OR APPLE)
 endif ()
 
 if (WIN32)
-    set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:Debug>:Debug>")
     target_link_libraries(${PROJECT_NAME} ws2_32.lib wldap32.lib advapi32.lib crypt32.lib wsock32.lib opengl32.lib iphlpapi.lib)
     target_link_options(${PROJECT_NAME} PUBLIC /DEBUG)
 elseif (APPLE)
