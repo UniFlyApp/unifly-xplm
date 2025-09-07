@@ -139,6 +139,7 @@ namespace unifly
 
                     unifly::schema::XPLMMessage event_elevation_message;
                     unifly::schema::RemoteReceiveElevation* event_elevation = event_elevation_message.mutable_remote_elevation();
+                    event_elevation->set_peer_id(plane.second->peer_id);
                     event_elevation->set_lat(lat);
                     event_elevation->set_lon(lon);
                     event_elevation->set_elevation(elevation);
