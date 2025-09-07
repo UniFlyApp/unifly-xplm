@@ -142,6 +142,7 @@ namespace unifly
                     event_elevation->set_lat(lat);
                     event_elevation->set_lon(lon);
                     event_elevation->set_elevation(elevation);
+                    instance->mEnv->send_msg(event_elevation_message);
                 }
             }
         }
@@ -166,26 +167,28 @@ namespace unifly
                        inNotification == xpmp_PlaneNotification_Created ? "created" :
                        inNotification == xpmp_PlaneNotification_ModelChanged ? "changed" : "destroyed");
 
-                unifly::schema::XPLMMessage message;
+                // Send spawn/despawn notification
                 if (inNotification == xpmp_PlaneNotification_Created)
                 {
+                    unifly::schema::XPLMMessage message;
                     unifly::schema::RemoteSpawned* remote_spawned = message.mutable_remote_spawned();
                     remote_spawned->set_peer_id(peer_id);
-
+                    instance->mEnv->send_msg(message);
                 }
                 else if (inNotification == xpmp_PlaneNotification_Destroyed)
                 {
+                    unifly::schema::XPLMMessage message;
                     unifly::schema::RemoteDespawned* remote_despawned = message.mutable_remote_despawned();
                     remote_despawned->set_peer_id(peer_id);
-
-                }
-                else if (inNotification == xpmp_PlaneNotification_ModelChanged)
-                {
-                    unifly::schema::RemoteReceiveModel* remote_model = message.mutable_remote_model();
-                    remote_model->set_peer_id(peer_id);
-                    remote_model->set_model(pAc->GetModelName());
+                    instance->mEnv->send_msg(message);
                 }
 
+
+                // Update the model
+                unifly::schema::XPLMMessage message;
+                unifly::schema::RemoteReceiveModel* remote_model = message.mutable_remote_model();
+                remote_model->set_peer_id(peer_id);
+                remote_model->set_model(pAc->GetModelName());
                 instance->mEnv->send_msg(message);
             } else {
                 Log("notifier callback did not find the plane id");
