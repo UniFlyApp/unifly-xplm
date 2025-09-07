@@ -58,7 +58,6 @@ namespace unifly
         TerrainProbe terrain_probe;
         double elevation_terrain;
 
-        // XPMPPlaneSurfaces_t surfaces;
         AircraftVisualState visual_state;
         bool engines;
 

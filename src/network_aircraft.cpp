@@ -42,8 +42,8 @@ namespace unifly
 		SetPitch(_visualState.pitch);
 		SetRoll(_visualState.bank);
 
-		label = "NetworkAircraft";
-        colLabel[0] = 0.0f;             // green
+		label = _callsign;
+        colLabel[0] = 0.0f;
         colLabel[1] = 1.0f;
         colLabel[2] = 0.0f;
 

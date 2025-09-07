@@ -5,13 +5,16 @@ package unifly.schema;
 message RemoteSpawn {
     uint32 peer_id = 1;
 
-    double lat = 2;
-    double lon = 3;
-    double pitch = 4;
-    double bank = 5;
-    double heading = 6;
+    string callsign = 2;
+    string aircraft = 3;
+    string airline = 4;
 
-    double alt_msl = 7;
+    double lat = 5;
+    double lon = 6;
+    double pitch = 7;
+    double bank = 8;
+    double heading = 9;
+    double alt_msl = 10;
 }
 
 message RemoteDespawn {
