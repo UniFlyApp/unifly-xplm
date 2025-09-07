@@ -60,6 +60,7 @@ message RemoteReportContext {
 message RemoteReceiveModel {
     uint32 peer_id = 1;
 
+    string model = 2;
 }
 
 message RemoteReceiveElevation {

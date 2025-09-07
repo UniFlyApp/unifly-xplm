@@ -181,8 +181,9 @@ namespace unifly
                 }
                 else if (inNotification == xpmp_PlaneNotification_ModelChanged)
                 {
-                    // unifly::schema::RemoteDespawned* remote_spawned = message.mutable_remote_despawned();
-                    //TODO!
+                    unifly::schema::RemoteReceiveModel* remote_model = message.mutable_remote_model();
+                    remote_model->set_peer_id(peer_id);
+                    remote_model->set_model(pAc->GetModelName());
                 }
 
                 instance->mEnv->send_msg(message);
