@@ -42,12 +42,14 @@ namespace unifly
 		SetPitch(_visualState.pitch);
 		SetRoll(_visualState.bank);
 
-		label = "XPMP2::Aircraft";
+		label = "NetworkAircraft";
         colLabel[0] = 0.0f;             // green
         colLabel[1] = 1.0f;
         colLabel[2] = 0.0f;
 
 		visual_state = _visualState;
+
+		SetOnGrnd(false);
     }
 
 
