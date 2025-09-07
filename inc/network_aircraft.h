@@ -28,11 +28,10 @@ namespace unifly
     {
         double lat;
         double lon;
-        double alt_msl;
-        double alt_agl;
         double pitch;
         double bank;
         double heading;
+        double alt_msl;
     };
 
 	inline float RpmToDegree(float rpm, double s)

@@ -358,7 +358,8 @@ namespace unifly
             return m_altitudeStd;
         }
 
-        const double deltaPressure = (1013.25 - m_barometerSeaLevel) * 30.0; // 30ft per mbar
+        float barometer = m_barometerSeaLevel * 33.8639; //29.92 -> 1013
+        const double deltaPressure = (1013.25 - barometer) * 30.0; // 30ft per mbar
         return (m_altitudeMslM * 3.28084) + deltaPressure;
     }
 

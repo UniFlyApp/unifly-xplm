@@ -65,7 +65,6 @@ namespace unifly
         visual_state.bank = remote_spawn.bank();
         visual_state.heading = remote_spawn.heading();
         visual_state.alt_msl = remote_spawn.alt_msl();
-        // visual_state.alt_agl = remote_spawn.alt_agl();
 
 
         NetworkAircraft* plane = new NetworkAircraft(peer_id, visual_state, callsign, aircraft, airline, "", "");
@@ -95,6 +94,7 @@ namespace unifly
         aircraft->visual_state.pitch = remote_report_position.pitch();
         aircraft->visual_state.bank = remote_report_position.bank();
         aircraft->visual_state.heading = remote_report_position.heading();
+        aircraft->visual_state.alt_msl = remote_report_position.alt_msl();
     }
 
     void AircraftManager::HandleReportContext(const unifly::schema::RemoteReportContext& remote_report_context)
