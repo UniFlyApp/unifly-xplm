@@ -149,8 +149,8 @@ namespace unifly
             unifly::schema::LocalReadFrequent* read_frequent = read_frequent_message.mutable_local_read_frequent();
             read_frequent->set_lat(instance->m_latitude);
             read_frequent->set_lon(instance->m_longitude);
-            read_frequent->set_pitch(instance->m_pitch);
-            read_frequent->set_bank(instance->m_bank);
+            read_frequent->set_pitch(-1.0F * instance->m_pitch);
+            read_frequent->set_bank(-1.0F * instance->m_bank);
             read_frequent->set_heading(instance->m_heading);
 
             read_frequent->set_ground_speed(instance->m_groundSpeed * 1.94384); //meters per second to knots
