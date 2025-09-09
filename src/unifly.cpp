@@ -153,7 +153,7 @@ namespace unifly
             read_frequent->set_bank(instance->m_bank);
             read_frequent->set_heading(instance->m_heading);
 
-            read_frequent->set_ground_speed(instance->m_groundSpeed);
+            read_frequent->set_ground_speed(instance->m_groundSpeed * 1.94384); //meters per second to knots
             read_frequent->set_vertical_speed(instance->m_verticalSpeed);
             read_frequent->set_on_ground(instance->m_onGround);
 
