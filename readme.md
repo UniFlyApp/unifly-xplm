@@ -16,3 +16,14 @@ The macos build artefact is a universal binary with both arm64 & x86_64 architec
 
 ## Create universal binary
 `lipo -create build_x86_64/UniFly-XPLM.xpl build_arm64/UniFly-XPLM.xpl -output UniFly-XPLM.xpl`
+
+# Building on Windows
+1. Ensure that the toolchain is MSVC, so I had to take Clang out of my PATH variable
+2. Uses (vcpkg)[https://learn.microsoft.com/en-us/vcpkg/get_started/get-started?pivots=shell-powershell] to install the protobuf library
+
+
+`mkdir build`
+
+`cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default`
+
+`cmake --build build`
