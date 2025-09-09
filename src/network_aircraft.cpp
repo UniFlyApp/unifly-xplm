@@ -39,8 +39,8 @@ namespace unifly
 		SetVisible(true);
 		SetLocation(_visualState.lat, _visualState.lon, _visualState.alt_msl);
 		SetHeading(_visualState.heading);
-		SetPitch(_visualState.pitch);
-		SetRoll(_visualState.bank);
+		SetPitch(-1.0F * _visualState.pitch);
+		SetRoll(-1.0F * _visualState.bank);
 
 		label = _callsign;
         colLabel[0] = 0.0f;
@@ -60,9 +60,9 @@ namespace unifly
             visual_state.lon,
             visual_state.alt_msl
         );
-        SetPitch(visual_state.pitch);
-        SetRoll(visual_state.bank);
         SetHeading(visual_state.heading);
+        SetRoll(-1.0F * visual_state.bank);
+        SetPitch(-1.0F * visual_state.pitch);
 
         if (engines) {
             SetEngineRotRpm(1200);
