@@ -67,6 +67,11 @@ namespace unifly
 
         XPMPModels = XPMPGetNumberOfInstalledModels();
 
+        if (XPMPModels == 0) {
+            Log("no models found; plugin will disable");
+            XPLMDisablePlugin(XPLMGetMyID());
+        }
+
         m_keepSocketAlive.store(true);
         m_socketThread = std::make_unique<std::thread>(&UniFly::SocketWorker, this);
     }
