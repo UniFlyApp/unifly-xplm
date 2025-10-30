@@ -65,7 +65,7 @@ namespace unifly
         /// User airplane altitude as pressure altitude in standard atmosphere
         DataRefAccess<double> m_altitudeStd;
 
-        DataRefAccess<double> m_altitudeTemperatureEffect;
+        DataRefAccess<float> m_altitudeTemperatureEffect;
         DataRefAccess<float> m_barometerSeaLevel;
 
         DataRefAccess<float> m_groundSpeed;
