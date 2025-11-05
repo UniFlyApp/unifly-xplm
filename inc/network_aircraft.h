@@ -50,7 +50,7 @@ namespace unifly
             const std::string& _icaoType,
       		const std::string& _icaoAirline,
       		const std::string& _livery,
-    		const std::string& _modelName
+    		const std::string& _modelId
         );
 
         const int peer_id;

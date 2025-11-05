@@ -75,7 +75,7 @@ namespace unifly
         DataRefAccess<float> m_flapRatio;
         DataRefAccess<float> m_speedbrakeRatio;
 
-		int XPlaneVersion, XPLMVersion, HostID, XPMPModels;
+		int XPlaneVersion, XPLMVersion, HostID;
 
     private:
     	static float DeferredStartup(float, float, int, void* ref);

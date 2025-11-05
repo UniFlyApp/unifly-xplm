@@ -65,7 +65,7 @@ namespace unifly
         TryGetTcasControl();
         XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 
-        XPMPModels = XPMPGetNumberOfInstalledModels();
+        int XPMPModels = XPMPGetNumberOfInstalledModels();
 
         if (XPMPModels == 0) {
             Log("no models found; plugin will disable");
@@ -234,7 +234,16 @@ namespace unifly
                         open->set_version_xplm(XPLMVersion);
                         open->set_version_xplane(XPlaneVersion);
                         open->set_version_plugin(PLUGIN_VERSION);
-                        open->set_models(XPMPModels);
+
+                        // Fetch models
+                        for (int i = 0; i < XPMPGetNumberOfInstalledModels(); ++i) {
+                            std::string modelName, icao, airline, livery;
+                            XPMPGetModelInfo2(i, modelName, icao, airline, livery);
+
+                            if (!modelName.empty()) {
+                                open->add_models(modelName);
+                            }
+                        }
 
                         send_msg(open_msg);
                     });
@@ -304,6 +313,7 @@ namespace unifly
 		}
 	}
 
+	/// Queue a callback to be ran by the xplane thread in the main flight loop
 	void UniFly::QueueCallback(const std::function<void()>& cb)
 	{
 		std::lock_guard<std::mutex> lck(m_mutex);
