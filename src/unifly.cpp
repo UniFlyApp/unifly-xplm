@@ -70,6 +70,7 @@ namespace unifly
         if (XPMPModels == 0) {
             Log("no models found; plugin will disable");
             XPLMDisablePlugin(XPLMGetMyID());
+            return;
         }
 
         m_keepSocketAlive.store(true);
