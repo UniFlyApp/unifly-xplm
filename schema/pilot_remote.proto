@@ -1,75 +1,72 @@
 syntax = "proto3";
 
-package unifly.schema;
+package unifly.schema.v1;
 
 message RemoteSpawn {
-    uint32 peer_id = 1;
+  uint32 peer_id = 1;
 
-    string callsign = 2;
-    string aircraft = 3;
-    string airline = 4;
+  string callsign = 2;
+  string aircraft = 3;
+  string airline = 4;
 
-    double lat = 5;
-    double lon = 6;
-    double pitch = 7;
-    double bank = 8;
-    double heading = 9;
-    double alt_msl = 10;
+  double lat = 5;
+  double lon = 6;
+  double pitch = 7;
+  double bank = 8;
+  double heading = 9;
+  double alt_msl = 10;
 }
 
 message RemoteDespawn {
-    uint32 peer_id = 1;
-
+  uint32 peer_id = 1;
 }
 
 message RemoteSpawned {
-    uint32 peer_id = 1;
-
+  uint32 peer_id = 1;
 }
 
 message RemoteDespawned {
-    uint32 peer_id = 1;
-
+  uint32 peer_id = 1;
 }
 
 message RemoteReportPosition {
-    uint32 peer_id = 1;
+  uint32 peer_id = 1;
 
-    double lat = 2;
-    double lon = 3;
-    double pitch = 4;
-    double bank = 5;
-    double heading = 6;
+  double lat = 2;
+  double lon = 3;
+  double pitch = 4;
+  double bank = 5;
+  double heading = 6;
 
-    double alt_msl = 7;
+  double alt_msl = 7;
 }
 
 message RemoteReportContext {
-    uint32 peer_id = 1;
+  uint32 peer_id = 1;
 
-    bool engines = 2;
-    bool onGround = 3;
-    float flaps = 4;
-    float spoilers = 5;
-    bool gear = 6;
+  bool engines = 2;
+  bool on_ground = 3;
+  float flaps = 4;
+  float spoilers = 5;
+  bool gear = 6;
 
-    bool lights_beacon = 7;
-    bool lights_landing = 8;
-    bool lights_nav = 9;
-    bool lights_strobe = 10;
-    bool lights_taxi = 11;
+  bool lights_beacon = 7;
+  bool lights_landing = 8;
+  bool lights_nav = 9;
+  bool lights_strobe = 10;
+  bool lights_taxi = 11;
 }
 
 message RemoteReceiveModel {
-    uint32 peer_id = 1;
+  uint32 peer_id = 1;
 
-    string model = 2;
+  string model = 2;
 }
 
 message RemoteReceiveElevation {
-    uint32 peer_id = 1;
+  uint32 peer_id = 1;
 
-    double elevation = 2;
-    double lat = 3;
-    double lon = 4;
+  double elevation = 2;
+  double lat = 3;
+  double lon = 4;
 }

@@ -87,7 +87,7 @@ namespace unifly
         std::unique_ptr<std::thread> m_socketThread;
 
 		void SocketWorker();
-		void ProcessPacket(const unifly::schema::XPlaneMessage msg);
+		void ProcessPacket(const unifly::schema::v1::XPlaneMessage msg);
 
 		std::mutex m_mutex;
 		std::deque<std::function<void()>> m_queuedCallbacks;

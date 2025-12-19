@@ -42,7 +42,7 @@ namespace unifly
 		XPMPUnregisterPlaneNotifierFunc(&AircraftManager::AircraftNotifierCallback, nullptr);
     }
 
-    void AircraftManager::HandleSpawn(const unifly::schema::RemoteSpawn& remote_spawn)
+    void AircraftManager::HandleSpawn(const unifly::schema::v1::RemoteSpawn& remote_spawn)
     {
         const int peer_id = remote_spawn.peer_id();
         Log("handle spawn %u", peer_id);
@@ -82,7 +82,7 @@ namespace unifly
         mapPlanes.clear();
     }
 
-    void AircraftManager::HandleReportPosition(const unifly::schema::RemoteReportPosition& remote_report_position)
+    void AircraftManager::HandleReportPosition(const unifly::schema::v1::RemoteReportPosition& remote_report_position)
     {
         const int peer_id = remote_report_position.peer_id();
         auto aircraft = GetAircraft(peer_id);
@@ -96,7 +96,7 @@ namespace unifly
         aircraft->visual_state.alt_msl = remote_report_position.alt_msl();
     }
 
-    void AircraftManager::HandleReportContext(const unifly::schema::RemoteReportContext& remote_report_context)
+    void AircraftManager::HandleReportContext(const unifly::schema::v1::RemoteReportContext& remote_report_context)
     {
         const int peer_id = remote_report_context.peer_id();
         auto aircraft = GetAircraft(peer_id);
@@ -136,8 +136,8 @@ namespace unifly
                     double lon = plane.second->visual_state.lon;
                     double elevation = plane.second->terrain_probe.GetTerrainElevation(lat, lon);
 
-                    unifly::schema::XPLMMessage event_elevation_message;
-                    unifly::schema::RemoteReceiveElevation* event_elevation = event_elevation_message.mutable_remote_elevation();
+                    unifly::schema::v1::XPLMMessage event_elevation_message;
+                    unifly::schema::v1::RemoteReceiveElevation* event_elevation = event_elevation_message.mutable_remote_elevation();
                     event_elevation->set_peer_id(plane.second->peer_id);
                     event_elevation->set_lat(lat);
                     event_elevation->set_lon(lon);
@@ -170,23 +170,23 @@ namespace unifly
                 // Send spawn/despawn notification
                 if (inNotification == xpmp_PlaneNotification_Created)
                 {
-                    unifly::schema::XPLMMessage message;
-                    unifly::schema::RemoteSpawned* remote_spawned = message.mutable_remote_spawned();
+                    unifly::schema::v1::XPLMMessage message;
+                    unifly::schema::v1::RemoteSpawned* remote_spawned = message.mutable_remote_spawned();
                     remote_spawned->set_peer_id(peer_id);
                     instance->mEnv->send_msg(message);
                 }
                 else if (inNotification == xpmp_PlaneNotification_Destroyed)
                 {
-                    unifly::schema::XPLMMessage message;
-                    unifly::schema::RemoteDespawned* remote_despawned = message.mutable_remote_despawned();
+                    unifly::schema::v1::XPLMMessage message;
+                    unifly::schema::v1::RemoteDespawned* remote_despawned = message.mutable_remote_despawned();
                     remote_despawned->set_peer_id(peer_id);
                     instance->mEnv->send_msg(message);
                 }
 
 
                 // Update the model
-                unifly::schema::XPLMMessage message;
-                unifly::schema::RemoteReceiveModel* remote_model = message.mutable_remote_model();
+                unifly::schema::v1::XPLMMessage message;
+                unifly::schema::v1::RemoteReceiveModel* remote_model = message.mutable_remote_model();
                 remote_model->set_peer_id(peer_id);
                 remote_model->set_model(pAc->GetModelName());
                 instance->mEnv->send_msg(message);

@@ -35,10 +35,10 @@ namespace unifly
         AircraftManager(UniFly* instance);
         virtual ~AircraftManager();
 
-        void HandleSpawn(const unifly::schema::RemoteSpawn& remote_spawn);
+        void HandleSpawn(const unifly::schema::v1::RemoteSpawn& remote_spawn);
         void HandleDespawn(const int peer_id);
-        void HandleReportPosition(const unifly::schema::RemoteReportPosition& remote_report_position);
-        void HandleReportContext(const unifly::schema::RemoteReportContext& remote_report_context);
+        void HandleReportPosition(const unifly::schema::v1::RemoteReportPosition& remote_report_position);
+        void HandleReportContext(const unifly::schema::v1::RemoteReportContext& remote_report_context);
 
         void DespawnAll();
 

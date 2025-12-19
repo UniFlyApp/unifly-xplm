@@ -1,35 +1,35 @@
 syntax = "proto3";
 
-package unifly.schema;
+package unifly.schema.v1;
 
 message LocalReadFrequent {
-    double lat = 1;
-    double lon = 2;
-    double pitch = 3;
-    double bank = 4;
-    double heading = 5;
+  double lat = 1;
+  double lon = 2;
+  double pitch = 3;
+  double bank = 4;
+  double heading = 5;
 
-    float ground_speed = 6;
-    float vertical_speed = 7;
-    bool on_ground = 8;
+  float ground_speed = 6;
+  float vertical_speed = 7;
+  bool on_ground = 8;
 
-    double alt_msl = 9;
-    double alt_agl = 10;
-    double alt_std = 11;
-    double alt_cal = 12;
+  double alt_msl = 9;
+  double alt_agl = 10;
+  double alt_std = 11;
+  double alt_cal = 12;
 
-    double cg_height = 13;
+  double cg_height = 13;
 }
 
 message LocalReadInfrequent {
-    bool lights_beacon = 1;
-    bool lights_landing = 2;
-    bool lights_nav = 4;
-    bool lights_strobe = 5;
-    bool lights_taxi = 6;
+  bool lights_beacon = 1;
+  bool lights_landing = 2;
+  bool lights_nav = 4;
+  bool lights_strobe = 5;
+  bool lights_taxi = 6;
 
-    float flaps = 7;
-    float spoilers = 8;
+  float flaps = 7;
+  float spoilers = 8;
 
-    bool gear_down = 9;
+  bool gear_down = 9;
 }

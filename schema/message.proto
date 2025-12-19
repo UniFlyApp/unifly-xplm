@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package unifly.schema;
+package unifly.schema.v1;
 
 import "pilot_local.proto";
 import "pilot_remote.proto";
@@ -40,4 +40,6 @@ message EventOpen {
   repeated string models = 5;
 }
 
-message EventFrame { uint32 counter = 1; }
+message EventFrame {
+  uint32 counter = 1;
+}
