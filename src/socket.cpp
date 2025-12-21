@@ -14,7 +14,7 @@ bool write_exact(tcp::socket& socket, asio::const_buffer buffer) {
 }
 
 // Sends a length-prefixed Protobuf message
-bool send_message(tcp::socket& socket, const unifly::schema::XPLMMessage& message) {
+bool send_message(tcp::socket& socket, const unifly::schema::v1::XPLMMessage& message) {
     // Check if the message size can fit in a uint16_t length prefix
     size_t message_size = message.ByteSizeLong();
     if (message_size > 65535) {
@@ -42,7 +42,7 @@ bool send_message(tcp::socket& socket, const unifly::schema::XPLMMessage& messag
 }
 
 // Receives a length-prefixed Protobuf message
-bool recv_message(tcp::socket& socket, unifly::schema::XPlaneMessage* message) {
+bool recv_message(tcp::socket& socket, unifly::schema::v1::XPlaneMessage* message) {
     if (!message) {
         Log("recv_message: Message pointer is null");
         return false;

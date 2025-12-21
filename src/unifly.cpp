@@ -145,14 +145,14 @@ namespace unifly
 			// UpdateMenuItems();
 
 			// Send event frame
-			unifly::schema::XPLMMessage event_frame_message;
-            unifly::schema::EventFrame* event_frame = event_frame_message.mutable_event_frame();
+			unifly::schema::v1::XPLMMessage event_frame_message;
+            unifly::schema::v1::EventFrame* event_frame = event_frame_message.mutable_event_frame();
             event_frame->set_counter(inCounter);
             instance->send_msg(event_frame_message);
 
             // Send local aircraft frequent
-            unifly::schema::XPLMMessage read_frequent_message;
-            unifly::schema::LocalReadFrequent* read_frequent = read_frequent_message.mutable_local_read_frequent();
+            unifly::schema::v1::XPLMMessage read_frequent_message;
+            unifly::schema::v1::LocalReadFrequent* read_frequent = read_frequent_message.mutable_local_read_frequent();
             read_frequent->set_lat(instance->m_latitude);
             read_frequent->set_lon(instance->m_longitude);
             read_frequent->set_pitch(-1.0F * instance->m_pitch);
@@ -182,8 +182,8 @@ namespace unifly
             // Send local aircraft infrequent
             // Counter counts in twos
             if (inCounter % (90 * 2) <= 1) {
-                unifly::schema::XPLMMessage read_infrequent_message;
-                unifly::schema::LocalReadInfrequent* read_infrequent = read_infrequent_message.mutable_local_read_infrequent();
+                unifly::schema::v1::XPLMMessage read_infrequent_message;
+                unifly::schema::v1::LocalReadInfrequent* read_infrequent = read_infrequent_message.mutable_local_read_infrequent();
                 read_infrequent->set_lights_beacon(instance->m_beaconLights);
                 read_infrequent->set_lights_landing(instance->m_landingLights);
                 read_infrequent->set_lights_nav(instance->m_navLights);
@@ -230,8 +230,8 @@ namespace unifly
                 try {
                     // Send Open
                     QueueCallback([=] {
-                        unifly::schema::XPLMMessage open_msg;
-                        unifly::schema::EventOpen* open = open_msg.mutable_event_open();
+                        unifly::schema::v1::XPLMMessage open_msg;
+                        unifly::schema::v1::EventOpen* open = open_msg.mutable_event_open();
                         open->set_version_xplm(XPLMVersion);
                         open->set_version_xplane(XPlaneVersion);
                         open->set_version_plugin(PLUGIN_VERSION);
@@ -251,7 +251,7 @@ namespace unifly
 
                     // Read
                     while (m_keepSocketAlive.load()) {
-                        unifly::schema::XPlaneMessage message;
+                        unifly::schema::v1::XPlaneMessage message;
                         if (!recv_message(*socket, &message)) {
                             Log("Failed to receive message or client disconnected");
                             break;
@@ -276,10 +276,10 @@ namespace unifly
         }
 	}
 
-	void UniFly::ProcessPacket(const unifly::schema::XPlaneMessage msg)
+	void UniFly::ProcessPacket(const unifly::schema::v1::XPlaneMessage msg)
 	{
 	    switch (msg.kind_case()) {
-			case unifly::schema::XPlaneMessage::kRemoteSpawn: {
+			case unifly::schema::v1::XPlaneMessage::kRemoteSpawn: {
 				QueueCallback([msg = std::move(msg), this]() mutable
 				{
 				    m_aircraftManager->HandleSpawn(msg.remote_spawn());
@@ -287,28 +287,28 @@ namespace unifly
 
 			    break;
 			}
-			case unifly::schema::XPlaneMessage::kRemoteDespawn: {
+			case unifly::schema::v1::XPlaneMessage::kRemoteDespawn: {
 				QueueCallback([msg = std::move(msg), this]() mutable
 				{
 				    m_aircraftManager->HandleDespawn(msg.remote_despawn().peer_id());
 				});
 			    break;
 			}
-			case unifly::schema::XPlaneMessage::kRemoteReportPosition: {
+			case unifly::schema::v1::XPlaneMessage::kRemoteReportPosition: {
 				QueueCallback([msg = std::move(msg), this]() mutable
 				{
 				    m_aircraftManager->HandleReportPosition(msg.remote_report_position());
 				});
 				break;
 			}
-			case unifly::schema::XPlaneMessage::kRemoteReportContext: {
+			case unifly::schema::v1::XPlaneMessage::kRemoteReportContext: {
 				QueueCallback([msg = std::move(msg), this]() mutable
 				{
 				    m_aircraftManager->HandleReportContext(msg.remote_report_context());
 				});
 				break;
 			}
-			case unifly::schema::XPlaneMessage::KIND_NOT_SET: {
+			case unifly::schema::v1::XPlaneMessage::KIND_NOT_SET: {
 			    break;
 			}
 		}
