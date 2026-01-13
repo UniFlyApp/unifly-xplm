@@ -25,7 +25,6 @@ message XPLMMessage {
     RemoteSpawned remote_spawned = 3;
     RemoteDespawned remote_despawned = 4;
 
-    RemoteReceiveModel remote_model = 5;
     RemoteReceiveElevation remote_elevation = 6;
 
     LocalReadFrequent local_read_frequent = 7;

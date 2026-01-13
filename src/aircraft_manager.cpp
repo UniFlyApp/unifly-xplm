@@ -173,6 +173,7 @@ namespace unifly
                     unifly::schema::v1::XPLMMessage message;
                     unifly::schema::v1::RemoteSpawned* remote_spawned = message.mutable_remote_spawned();
                     remote_spawned->set_peer_id(peer_id);
+                    remote_spawned->set_model(pAc->GetModelName());
                     instance->mEnv->send_msg(message);
                 }
                 else if (inNotification == xpmp_PlaneNotification_Destroyed)
@@ -180,16 +181,9 @@ namespace unifly
                     unifly::schema::v1::XPLMMessage message;
                     unifly::schema::v1::RemoteDespawned* remote_despawned = message.mutable_remote_despawned();
                     remote_despawned->set_peer_id(peer_id);
+                    remote_despawned->set_model(pAc->GetModelName());
                     instance->mEnv->send_msg(message);
                 }
-
-
-                // Update the model
-                unifly::schema::v1::XPLMMessage message;
-                unifly::schema::v1::RemoteReceiveModel* remote_model = message.mutable_remote_model();
-                remote_model->set_peer_id(peer_id);
-                remote_model->set_model(pAc->GetModelName());
-                instance->mEnv->send_msg(message);
             } else {
                 Log("notifier callback did not find the plane id");
             }
