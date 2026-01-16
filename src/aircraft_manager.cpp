@@ -54,6 +54,7 @@ namespace unifly
             return;
         }
 
+        const std::string& model = remote_spawn.model();
         const std::string& callsign = remote_spawn.callsign();
         const std::string& airline = remote_spawn.airline();
         const std::string& aircraft = remote_spawn.aircraft();
@@ -66,7 +67,7 @@ namespace unifly
         visual_state.heading = remote_spawn.heading();
         visual_state.alt_msl = remote_spawn.alt_msl();
 
-        NetworkAircraft* plane = new NetworkAircraft(peer_id, visual_state, callsign, aircraft, airline, "", "");
+        NetworkAircraft* plane = new NetworkAircraft(peer_id, visual_state, callsign, aircraft, airline, "", model);
         mapPlanes.emplace(peer_id, std::move(plane));
     }
 

@@ -5,6 +5,7 @@ package unifly.schema.v1;
 message RemoteSpawn {
   uint32 peer_id = 1;
 
+  optional string model = 11;
   string callsign = 2;
   string aircraft = 3;
   string airline = 4;
