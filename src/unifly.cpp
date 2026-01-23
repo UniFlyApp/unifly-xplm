@@ -65,14 +65,6 @@ namespace unifly
         TryGetTcasControl();
         XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 
-        int XPMPModels = XPMPGetNumberOfInstalledModels();
-
-        if (XPMPModels == 0) {
-            Log("no models found; plugin will disable");
-            XPLMDisablePlugin(XPLMGetMyID());
-            return;
-        }
-
         m_keepSocketAlive.store(true);
         m_socketThread = std::make_unique<std::thread>(&UniFly::SocketWorker, this);
     }
