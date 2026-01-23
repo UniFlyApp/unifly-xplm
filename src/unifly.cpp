@@ -218,7 +218,7 @@ namespace unifly
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     continue;
                 } else if (ec) {
-                    Log("Accept failed: &s", ec.message().c_str());
+                    Log("Accept failed: %s", ec.message().c_str());
                     continue;
                 }
 
