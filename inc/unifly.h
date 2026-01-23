@@ -1,6 +1,6 @@
 #pragma once
 #include "data_ref_access.h"
-#define PLUGIN_VERSION 100
+#define UNIFLY_PLUGIN_VERSION 100
 
 #include "data_ref_owned.h"
 #include "utilities.h"

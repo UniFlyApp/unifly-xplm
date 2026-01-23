@@ -234,7 +234,7 @@ namespace unifly
                         unifly::schema::v1::EventOpen* open = open_msg.mutable_event_open();
                         open->set_version_xplm(XPLMVersion);
                         open->set_version_xplane(XPlaneVersion);
-                        open->set_version_plugin(PLUGIN_VERSION);
+                        open->set_version_plugin(UNIFLY_PLUGIN_VERSION);
 
                         // Fetch models
                         for (int i = 0; i < XPMPGetNumberOfInstalledModels(); ++i) {
