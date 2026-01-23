@@ -73,6 +73,12 @@ namespace unifly
     {
         m_keepSocketAlive.store(false);
 
+        if (m_socket) {
+            asio::error_code ec;
+            m_socket->shutdown(tcp::socket::shutdown_both, ec);
+            m_socket->close(ec);
+        }
+
         if (m_socketThread) {
             Log("joining socket thread");
             m_socketThread->join();
@@ -216,7 +222,7 @@ namespace unifly
                     continue;
                 }
 
-                Log("Client connected\n");
+                Log("Client connected");
                 m_socket = socket;
 
                 try {
@@ -241,7 +247,7 @@ namespace unifly
                         send_msg(open_msg);
                     });
 
-                    // Read
+                    // Poll socket - keep connection alive
                     while (m_keepSocketAlive.load()) {
                         unifly::schema::v1::XPlaneMessage message;
                         if (!recv_message(*socket, &message)) {
@@ -250,12 +256,13 @@ namespace unifly
                         }
 
                         ProcessPacket(message);
-                        //TODO: Is there a buffer for us to free here? idk
                     }
+
+                    // Cleanup + close
+                    Log("Client disconnecting");
 
                     m_socket = nullptr;
 
-                    // Despawn planes
                     QueueCallback([=] {
                         DeleteAllAircraft();
                     });
