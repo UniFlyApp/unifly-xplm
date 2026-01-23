@@ -38,7 +38,7 @@ namespace unifly
 		    if(m_socket) {
 				if (!send_message(*m_socket, msg)) {
     				Log("failed to send a message");
-    				m_keepSocketAlive = false;
+    				m_keepSocketAlive.store(false);
     			}
 			}
 		}
