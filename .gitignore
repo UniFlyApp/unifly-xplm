@@ -1,3 +1,7 @@
+!dist/
+!dist/**
+
+
 build/*
 build_arm64/*
 build_x86_64/*

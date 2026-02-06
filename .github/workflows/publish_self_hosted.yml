@@ -1,0 +1,90 @@
+name: "publish"
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "*.*.*. Without a 'v'"
+        required: true
+        type: string
+      prerelease:
+        description: "Publish this release as a pre-release"
+        default: false
+        type: boolean
+
+run-name: Build release v${{ inputs.version }}
+
+jobs:
+  build_macos:
+    runs-on: [self-hosted, macOS, ARM64]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Build
+        run: |
+          arch -x86_64 /usr/local/bin/cmake -B build_x86_64 -S . -DCMAKE_PREFIX_PATH=/usr/local
+          arch -x86_64 /usr/local/bin/cmake --build build_x86_64
+          arch -arm64 /opt/homebrew/bin/cmake -B build_arm64 -S . -DCMAKE_PREFIX_PATH=/opt/homebrew
+          arch -arm64 /opt/homebrew/bin/cmake --build build_arm64
+          lipo -create build_x86_64/UniFly-XPLM.xpl build_arm64/UniFly-XPLM.xpl -output UniFly-XPLM.xpl
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-macos
+          path: |
+            UniFly-XPLM.xpl
+
+  build_windows:
+    runs-on: [self-hosted, Windows, X64]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Build
+        run: |
+          mkdir build
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
+          cmake --build build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-windows
+          path: |
+            build/UniFly-XPLM.xpl
+
+  publish:
+    needs: build
+    runs-on: [self-hosted, macOS, ARM64]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Bundle
+        run: |
+          mv artifacts/build-macos/UniFly-XPLM.xpl dist/mac_x64/UniFly-XPLM.xpl
+          mv artifacts/build-windows/UniFly-XPLM.xpl dist/win_x64/UniFly-XPLM.xpl
+          mv artifacts/build-windows/UniFly-XPLM.pdb dist/win_x64/UniFly-XPLM.pdb
+          echo "v${{ inputs.version }}" > dist/version.txt
+
+      - name: Compress UniFly.app
+        run: |
+          zip -r UniFly-XPLM-v${{ inputs.version }}.zip dist
+
+      - name: Upload release
+        id: upload-release
+        uses: softprops/action-gh-release@v2
+        with:
+          prerelease: ${{ inputs.prerelease }}
+          tag_name: v${{ inputs.version }}
+          repository: UniFlyApp/unifly-xplm
+          token: ${{ secrets.RELEASE_WORKFLOW_TOKEN }}
+          files: |
+            UniFly-XPLM-v${{ inputs.version }}.zip
