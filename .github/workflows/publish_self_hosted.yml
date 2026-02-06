@@ -72,6 +72,7 @@ jobs:
 
       - name: Bundle
         run: |
+          ls -R artifacts
           mv artifacts/build-macos/UniFly-XPLM.xpl dist/mac_x64/UniFly-XPLM.xpl
           mv artifacts/build-windows/UniFly-XPLM.xpl dist/win_x64/UniFly-XPLM.xpl
           mv artifacts/build-windows/UniFly-XPLM.pdb dist/win_x64/UniFly-XPLM.pdb
