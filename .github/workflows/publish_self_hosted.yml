@@ -47,7 +47,7 @@ jobs:
       - name: Build
         run: |
           mkdir build
-          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=vcpkg
           cmake --build build
 
       - name: Upload build artifacts
