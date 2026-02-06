@@ -58,7 +58,7 @@ jobs:
             build/UniFly-XPLM.xpl
 
   publish:
-    needs: build
+    needs: [build_macos, build_windows]
     runs-on: [self-hosted, macOS, ARM64]
     steps:
       - uses: actions/checkout@v6
