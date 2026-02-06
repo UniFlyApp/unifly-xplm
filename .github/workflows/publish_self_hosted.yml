@@ -57,7 +57,8 @@ jobs:
         with:
           name: build-windows
           path: |
-            build/UniFly-XPLM.xpl
+            build/win_x64/UniFly-XPLM.xpl
+            build/win_x64/UniFly-XPLM.pdb
 
   publish:
     needs: [build_macos, build_windows]
@@ -72,8 +73,8 @@ jobs:
       - name: Bundle
         run: |
           mv artifacts/build-macos/UniFly-XPLM.xpl dist/mac_x64/UniFly-XPLM.xpl
-          mv artifacts/build-windows/UniFly-XPLM.xpl dist/win_x64/UniFly-XPLM.xpl
-          mv artifacts/build-windows/UniFly-XPLM.pdb dist/win_x64/UniFly-XPLM.pdb
+          mv artifacts/build-windows/win_x64/UniFly-XPLM.xpl dist/win_x64/UniFly-XPLM.xpl
+          mv artifacts/build-windows/win_x64/UniFly-XPLM.pdb dist/win_x64/UniFly-XPLM.pdb
           echo "v${{ inputs.version }}" > dist/version.txt
 
       - name: Compress UniFly.app
