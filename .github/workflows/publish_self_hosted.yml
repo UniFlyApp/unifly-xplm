@@ -89,7 +89,5 @@ jobs:
         with:
           prerelease: ${{ inputs.prerelease }}
           tag_name: v${{ inputs.version }}
-          repository: UniFlyApp/unifly-xplm
-          token: ${{ secrets.RELEASE_WORKFLOW_TOKEN }}
           files: |
             UniFly-XPLM-v${{ inputs.version }}.zip
