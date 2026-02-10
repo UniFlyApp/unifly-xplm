@@ -61,7 +61,6 @@ jobs:
             build/win_x64/UniFly-XPLM.pdb
             build/win_x64/abseil_dll.dll
             build/win_x64/libprotobuf.dll
-            build/win_x64/fmod.dll
 
   publish:
     needs: [build_macos, build_windows]
@@ -82,7 +81,6 @@ jobs:
           mv artifacts/build-windows/UniFly-XPLM.pdb UniFly-XPLM/win_x64/UniFly-XPLM.pdb
           mv artifacts/build-windows/abseil_dll.dll UniFly-XPLM/win_x64/abseil_dll.dll
           mv artifacts/build-windows/libprotobuf.dll UniFly-XPLM/win_x64/libprotobuf.dll
-          mv artifacts/build-windows/fmod.dll UniFly-XPLM/win_x64/fmod.dll
           echo "v${{ inputs.version }}" > UniFly-XPLM/version.txt
 
       - name: Compress UniFly.app
