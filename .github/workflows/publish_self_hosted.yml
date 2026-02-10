@@ -59,6 +59,8 @@ jobs:
           path: |
             build/win_x64/UniFly-XPLM.xpl
             build/win_x64/UniFly-XPLM.pdb
+            build/win_x64/abseil_dll.dll
+            build/win_x64/libprotobuf.dll
 
   publish:
     needs: [build_macos, build_windows]
@@ -73,15 +75,15 @@ jobs:
       - name: Bundle
         run: |
           ls -R artifacts
-          mkdir -p dist/mac_x64 dist/win_x64
-          mv artifacts/build-macos/UniFly-XPLM.xpl dist/mac_x64/UniFly-XPLM.xpl
-          mv artifacts/build-windows/UniFly-XPLM.xpl dist/win_x64/UniFly-XPLM.xpl
-          mv artifacts/build-windows/UniFly-XPLM.pdb dist/win_x64/UniFly-XPLM.pdb
-          echo "v${{ inputs.version }}" > dist/version.txt
+          mkdir -p UniFly-XPLM/mac_x64 UniFly-XPLM/win_x64
+          mv artifacts/build-macos/UniFly-XPLM.xpl UniFly-XPLM/mac_x64/UniFly-XPLM.xpl
+          mv artifacts/build-windows/UniFly-XPLM.xpl UniFly-XPLM/win_x64/UniFly-XPLM.xpl
+          mv artifacts/build-windows/UniFly-XPLM.pdb UniFly-XPLM/win_x64/UniFly-XPLM.pdb
+          echo "v${{ inputs.version }}" > UniFly-XPLM/version.txt
 
       - name: Compress UniFly.app
         run: |
-          zip -r UniFly-XPLM-v${{ inputs.version }}.zip dist
+          zip -r UniFly-XPLM-v${{ inputs.version }}.zip UniFly-XPLM
 
       - name: Upload release
         id: upload-release
