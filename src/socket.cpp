@@ -1,4 +1,5 @@
 #include "utilities.h"
+#include <math.h>
 
 using asio::ip::tcp;
 
@@ -17,14 +18,14 @@ bool write_exact(tcp::socket& socket, asio::const_buffer buffer) {
 bool send_message(tcp::socket& socket, const unifly::schema::v1::XPLMMessage& message) {
     // Check if the message size can fit in a uint16_t length prefix
     size_t message_size = message.ByteSizeLong();
-    if (message_size > 65535) {
-        std::cerr << "Message size (" << message_size << ") exceeds uint16_t capacity.\n";
+    if (message_size >= pow(2, 32)) {
+		Log("failed to send a message: message is too long");
         return false;
     }
-    uint16_t message_length = static_cast<uint16_t>(message_size);
+    uint32_t message_length = static_cast<uint32_t>(message_size);
 
     // Create a buffer large enough for the prefix and the message
-    int prefix_length = sizeof(uint16_t);
+    int prefix_length = sizeof(uint32_t);
     std::vector<uint8_t> buffer(prefix_length + message_length);
 
     // Manually copy the little-endian length prefix to the start of the buffer
@@ -33,7 +34,7 @@ bool send_message(tcp::socket& socket, const unifly::schema::v1::XPLMMessage& me
 
     // Serialize the message directly into the buffer after the prefix
     if (!message.SerializeToArray(buffer.data() + prefix_length, message_length)) {
-        std::cerr << "Failed to serialize message.\n";
+        Log("failed to send a message: failed to serialize message");
         return false;
     }
 
