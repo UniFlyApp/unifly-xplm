@@ -60,7 +60,7 @@ bool recv_message(tcp::socket& socket, unifly::schema::v1::XPlaneMessage* messag
     }
 
     uint32_t message_length = 0;
-    google::protobuf::io::CodedInputStream::ReadLittleEndian16FromArray(prefix_buf, &message_length);
+    google::protobuf::io::CodedInputStream::ReadLittleEndian32FromArray(prefix_buf, &message_length);
 
     if (message_length == 0 || message_length > 65535) {
         Log("recv_message: Invalid message length %i", message_length);
