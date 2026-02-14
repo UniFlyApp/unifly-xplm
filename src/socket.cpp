@@ -52,14 +52,14 @@ bool recv_message(tcp::socket& socket, unifly::schema::v1::XPlaneMessage* messag
     asio::error_code ec;
 
     // Read little endian u16 length prefix
-    uint8_t prefix_buf[sizeof(uint16_t)]{};
+    uint8_t prefix_buf[sizeof(uint32_t)]{};
     size_t prefix_read = asio::read(socket, asio::buffer(prefix_buf, sizeof(prefix_buf)), ec);
     if (ec || prefix_read != sizeof(prefix_buf)) {
         Log("recv_message: Failed to read length prefix %s", ec.message().c_str());
         return false;
     }
 
-    uint16_t message_length = 0;
+    uint32_t message_length = 0;
     google::protobuf::io::CodedInputStream::ReadLittleEndian16FromArray(prefix_buf, &message_length);
 
     if (message_length == 0 || message_length > 65535) {
