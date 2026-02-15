@@ -17,7 +17,7 @@ PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescript
 	{
 		XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
 		XPMPSetPluginName("UniFly");
-		Log("XPluginStart");
+		Log("XPluginStart. Version = %d", UNIFLY_PLUGIN_VERSION);
 	}
 	catch (const std::exception& e)
 	{
