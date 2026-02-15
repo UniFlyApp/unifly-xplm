@@ -30,7 +30,7 @@ bool send_message(tcp::socket& socket, const unifly::schema::v1::XPLMMessage& me
 
     // Manually copy the little-endian length prefix to the start of the buffer
     // using a helper from Protobuf to ensure correctness.
-    google::protobuf::io::CodedOutputStream::WriteLittleEndian16ToArray(message_length, buffer.data());
+    google::protobuf::io::CodedOutputStream::WriteLittleEndian32ToArray(message_length, buffer.data());
 
     // Serialize the message directly into the buffer after the prefix
     if (!message.SerializeToArray(buffer.data() + prefix_length, message_length)) {
