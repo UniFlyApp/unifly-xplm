@@ -26,6 +26,6 @@ The macos build artefact is a universal binary with both arm64 & x86_64 architec
 
 `mkdir build`
 
-`cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default`
+`cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=vcpkg`
 
 `cmake --build build`

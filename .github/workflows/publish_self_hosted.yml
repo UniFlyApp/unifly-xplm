@@ -24,9 +24,9 @@ jobs:
 
       - name: Build
         run: |
-          arch -x86_64 /usr/local/bin/cmake -B build_x86_64 -S . -DCMAKE_PREFIX_PATH=/usr/local
+          arch -x86_64 /usr/local/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=mac-x86_64
           arch -x86_64 /usr/local/bin/cmake --build build_x86_64
-          arch -arm64 /opt/homebrew/bin/cmake -B build_arm64 -S . -DCMAKE_PREFIX_PATH=/opt/homebrew
+          arch -arm64 /opt/homebrew/bin/cmake  -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=mac-arm64
           arch -arm64 /opt/homebrew/bin/cmake --build build_arm64
           lipo -create build_x86_64/UniFly-XPLM.xpl build_arm64/UniFly-XPLM.xpl -output UniFly-XPLM.xpl
 
@@ -49,7 +49,7 @@ jobs:
       - name: Build
         run: |
           mkdir build
-          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=vcpkg
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=windows
           cmake --build build
 
       - name: Upload build artifacts
