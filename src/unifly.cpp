@@ -60,7 +60,7 @@ namespace unifly
 
     void UniFly::Initialize()
     {
-        Log("init");
+        LOG_MSG("init");
         InitializeXPMP();
         TryGetTcasControl();
         XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
@@ -80,9 +80,9 @@ namespace unifly
         }
 
         if (m_socketThread) {
-            Log("joining socket thread");
+            LOG_MSG("joining socket thread");
             m_socketThread->join();
-            Log("joined socket thread");
+            LOG_MSG("joined socket thread");
         }
     }
 
@@ -104,7 +104,7 @@ namespace unifly
 
     	if (*err)
     	{
-    		Log("UniFly: Error initializing multiplayer: %s", err);
+    		LOG_MSG("UniFly: Error initializing multiplayer: %s", err);
     		XPMPMultiplayerCleanup();
     		return false;
     	}
@@ -112,14 +112,17 @@ namespace unifly
         // Load our CSL models
         auto res = XPMPLoadCSLPackage(pathResources.c_str());
         if (*err) {
-            Log("UniFly: Error while loading CSL packages: %s", res);
+            LOG_MSG("UniFly: Error while loading CSL packages: %s", res);
             return false;
         }
 
         // TODO: check these
     	// XPMPEnableAircraftLabels(Config::GetInstance().GetShowHideLabels());
     	// XPMPSetAircraftLabelDist(Config::GetInstance().GetMaxLabelDistance(), Config::GetInstance().GetLabelCutoffVis());
-    	// XPMPSetAudioDevice(Config::GetInstance().GetAudioDevice());
+
+
+        // TODO: ASAP!
+        // XPMPSetAudioDevice(Config::GetInstance().GetAudioDevice());
 
     	return true;
 	}
@@ -204,7 +207,7 @@ namespace unifly
             asio::io_context io;
             tcp::acceptor acceptor(io, tcp::endpoint(tcp::v4(), XPLM_PORT));
             acceptor.non_blocking(true);
-            Log("Waiting for connection...");
+            LOG_MSG("Waiting for connection...");
 
             while (m_keepSocketAlive.load())
             {
@@ -218,11 +221,11 @@ namespace unifly
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     continue;
                 } else if (ec) {
-                    Log("Accept failed: %s", ec.message().c_str());
+                    LOG_MSG("Accept failed: %s", ec.message().c_str());
                     continue;
                 }
 
-                Log("Client connected");
+                LOG_MSG("Client connected");
                 m_socket = socket;
 
                 try {
@@ -251,7 +254,7 @@ namespace unifly
                     while (m_keepSocketAlive.load()) {
                         unifly::schema::v1::XPlaneMessage message;
                         if (!recv_message(*socket, &message)) {
-                            Log("Failed to receive message or client disconnected");
+                            LOG_MSG("Failed to receive message or client disconnected");
                             break;
                         }
 
@@ -259,7 +262,7 @@ namespace unifly
                     }
 
                     // Cleanup + close
-                    Log("Client disconnecting");
+                    LOG_MSG("Client disconnecting");
 
                     m_socket = nullptr;
 
@@ -267,11 +270,11 @@ namespace unifly
                         DeleteAllAircraft();
                     });
                 } catch (std::exception& e) {
-                    Log("UniFly: Connection closed", e.what());
+                    LOG_MSG("UniFly: Connection closed: %s", e.what());
                 }
             }
         } catch (std::exception& e) {
-            Log("UniFly: Fatal error in socket", e.what());
+            LOG_MSG("UniFly: Fatal error in socket: %s", e.what());
         }
 	}
 
@@ -347,7 +350,7 @@ namespace unifly
 			auto err = XPMPMultiplayerEnable(callbackRequestTcasAgain);
 			if (*err)
 			{
-				Log("", err);
+				LOG_MSG("error in XPMPMulitplayerEnable: %s", err);
 			}
 		}
 	}
@@ -357,7 +360,7 @@ namespace unifly
 		if (XPMPHasControlOfAIAircraft())
 		{
 			XPMPMultiplayerDisable();
-			Log("xPilot has released TCAS control");
+			LOG_MSG("UniFly has released TCAS control");
 		}
 	}
 

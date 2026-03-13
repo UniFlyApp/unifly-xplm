@@ -58,7 +58,7 @@ namespace unifly {
 	public:
 		LookupException(const std::string& msg) :
 			runtime_error(msg) {
-			Log("data_ref_access lookup exception: %s", msg.c_str());
+			LOG_MSG("data_ref_access lookup exception: %s", msg.c_str());
 		}
 	};
 

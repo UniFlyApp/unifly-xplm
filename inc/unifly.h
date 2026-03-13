@@ -1,11 +1,13 @@
 #pragma once
-#include "data_ref_access.h"
+
 // Change the expected unifly plugin version in net_shared.rs
 #define UNIFLY_PLUGIN_VERSION 120
 
+#include "data_ref_access.h"
 #include "data_ref_owned.h"
 #include "utilities.h"
 #include "socket.h"
+#include <thread>
 
 using asio::ip::tcp;
 
@@ -37,7 +39,7 @@ namespace unifly
 		{
 		    if(m_socket) {
 				if (!send_message(*m_socket, msg)) {
-    				Log("failed to send a message");
+                    LOG_MSG("failed to send a message")
     				m_keepSocketAlive.store(false);
     			}
 			}
@@ -97,5 +99,21 @@ namespace unifly
 
 		std::unique_ptr<AircraftManager> m_aircraftManager;
     };
+
+
+    struct Global {
+        public:
+
+        std::thread::id xpThread;
+
+        void MarkXPlaneThread()
+        {
+            xpThread = std::this_thread::get_id();
+        }
+
+        bool IsXPThread() const { return std::this_thread::get_id() == xpThread; }
+    };
+
+    extern Global global;
 
 };

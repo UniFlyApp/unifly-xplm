@@ -4,6 +4,8 @@
 
 #include "XPMPMultiplayer.h"
 
+namespace unifly {
+
 std::unique_ptr<unifly::UniFly> environment;
 
 PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescription)
@@ -11,17 +13,17 @@ PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescript
     strcpy(outName, "UniFly");
 	strcpy(outSignature, "gg.unifly.xplm");
 	strcpy(outDescription, "UniFly cross platform multiplayer XPLM Adapter");
-	Log("XPluginStarting");
+	LOG_MSG("XPluginStarting");
 
 	try
 	{
 		XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
 		XPMPSetPluginName("UniFly");
-		Log("XPluginStart. Version = %d", UNIFLY_PLUGIN_VERSION);
+		LOG_MSG("XPluginStart. Version = %d", UNIFLY_PLUGIN_VERSION);
 	}
 	catch (const std::exception& e)
 	{
-		Log("Exception in XPluginStart: %s", e.what());
+		LOG_MSG("Exception in XPluginStart: %s", e.what());
 		return 0;
 	}
 	catch (...)
@@ -41,11 +43,11 @@ PLUGIN_API int XPluginEnable(void)
 			environment.reset();
 		}
 		environment = std::make_unique<unifly::UniFly>();
-		Log("XPluginEnable");
+		LOG_MSG("XPluginEnable");
 	}
 	catch (std::exception& e)
 	{
-		Log("Exception in XPluginEnable: %s", e.what());
+		LOG_MSG("Exception in XPluginEnable: %s", e.what());
 		return 0;
 	}
 	catch (...)
@@ -60,17 +62,17 @@ PLUGIN_API void XPluginDisable(void)
 {
 	try
 	{
-	    Log("XPluginDisabling");
+	    LOG_MSG("XPluginDisabling");
 		environment->DeleteAllAircraft();
 		environment->Shutdown();
 		environment.reset();
 		XPMPMultiplayerDisable();
 		XPMPMultiplayerCleanup();
-		Log("XPluginDisable");
+		LOG_MSG("XPluginDisable");
 	}
 	catch (std::exception& e)
 	{
-		Log("Exception in XPluginDisable: %s", e.what());
+		LOG_MSG("Exception in XPluginDisable: %s", e.what());
 	}
 	catch (...)
 	{
@@ -90,11 +92,11 @@ PLUGIN_API void XPluginStop(void)
 		// XPLMUnregisterCommandHandler(ContactAtcCommand, ContactAtcCommandHandler, 0, 0);
 		// XPLMUnregisterCommandHandler(ToggleDefaultAtisCommand, ToggleDefaultAtisCommandHandler, 0, 0);
 		// XPLMUnregisterCommandHandler(ToggleTcasCommand, ToggleTcasCommandHandler, 0, 0);
-		Log("XPluginStop");
+		LOG_MSG("XPluginStop");
 	}
 	catch (const std::exception& e)
 	{
-		Log("UniFly: Exception in XPluginStop: %s", e.what());
+		LOG_MSG("UniFly: Exception in XPluginStop: %s", e.what());
 	}
 	catch (...)
 	{
@@ -103,5 +105,7 @@ PLUGIN_API void XPluginStop(void)
 
 PLUGIN_API void XPluginReceiveMessage(XPLMPluginID from, int msg, void* inParam)
 {
+
+}
 
 }

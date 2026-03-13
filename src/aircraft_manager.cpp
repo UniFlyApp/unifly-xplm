@@ -45,7 +45,7 @@ namespace unifly
     void AircraftManager::HandleSpawn(const unifly::schema::v1::RemoteSpawn& remote_spawn)
     {
         const int peer_id = remote_spawn.peer_id();
-        Log("handle spawn %u", peer_id);
+        LOG_MSG("handle spawn %u", peer_id);
 
         auto planeIt = GetAircraft(peer_id);
         if (planeIt) {
@@ -159,7 +159,7 @@ namespace unifly
             if (pAc)
             {
 
-                Log("Plane (%u) of type %s, airline %s, model %s, label '%s' %s",
+                LOG_MSG("Plane (%u) of type %s, airline %s, model %s, label '%s' %s",
                        peer_id,
                        pAc->acIcaoType.c_str(),
                        pAc->acIcaoAirline.c_str(),
@@ -186,7 +186,7 @@ namespace unifly
                     instance->mEnv->send_msg(message);
                 }
             } else {
-                Log("notifier callback did not find the plane id");
+                LOG_MSG("notifier callback did not find the plane id");
             }
         }
     }
