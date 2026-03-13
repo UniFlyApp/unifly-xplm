@@ -29,6 +29,8 @@ const char* LogGetString ( const char* szFile, int ln, const char* szFunc, const
 /// Log Text to log file
 void LogMsg ( const char* szFile, int ln, const char* szFunc, const char* szMsg, ... ) XPMP2_FMTARGS(4);
 
+void FlushMsgs ();
+
 //
 // MARK: Logging macros
 //

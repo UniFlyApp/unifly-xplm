@@ -140,6 +140,8 @@ namespace unifly
 		auto* instance = static_cast<UniFly*>(ref);
 		if (instance)
 		{
+		    FlushMsgs();
+
 			instance->InvokeQueuedCallbacks();
 			instance->m_aiControlled = XPMPHasControlOfAIAircraft();
 			instance->m_aircraftCount = XPMPCountPlanes();

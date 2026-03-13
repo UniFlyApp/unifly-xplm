@@ -15,6 +15,8 @@ PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescript
 	strcpy(outDescription, "UniFly cross platform multiplayer XPLM Adapter");
 	LOG_MSG("XPluginStarting");
 
+	unifly::global.MarkXPlaneThread();
+
 	try
 	{
 		XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
