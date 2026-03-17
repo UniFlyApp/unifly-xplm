@@ -34,7 +34,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 file(
     REAL_PATH
-    "${CMAKE_CURRENT_SOURCE_DIR}/schema/"
+    "${CMAKE_CURRENT_SOURCE_DIR}/schema/unifly/schema/v1"
     PROTO_IMPORT_DIR
 )
 message("PROTO SCHEMAS = ${PROTO_IMPORT_DIR}")

@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package unifly.schema.v1;
+
+message Settings {
+    bool labels_enabled = 1;
+    float labels_max_dist = 2;
+
+    bool sounds_enabled = 3;
+    string sounds_device = 4;
+}
