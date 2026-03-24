@@ -34,6 +34,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: build-macos
+          retention-days: 2
           path: |
             UniFly-XPLM.xpl
 
@@ -56,6 +57,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: build-windows
+          retention-days: 2
           path: |
             build/win_x64/UniFly-XPLM.xpl
             build/win_x64/UniFly-XPLM.pdb
