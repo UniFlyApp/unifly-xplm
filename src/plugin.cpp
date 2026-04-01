@@ -1,6 +1,7 @@
 #include "plugin.h"
 #include "utilities.h"
 #include "unifly.h"
+#include "config.h"
 
 #include "XPMPMultiplayer.h"
 
@@ -109,5 +110,38 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID from, int msg, void* inParam)
 {
 
 }
+
+void RegisterMenuItems() {
+    // Commands
+   	ToggleAircraftLabelsCommand = XPLMCreateCommand("unifly/toggle_aircraft_labels", "UniFly: Toggle Aircraft Labels");
+	XPLMRegisterCommandHandler(ToggleAircraftLabelsCommand, ToggleAircraftLabelsCommandHandler, 1, (void*)0);
+
+	// Menu
+	PluginMenuIdx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "UniFly", nullptr, 0);
+	PluginMenu = XPLMCreateMenu("xPilot", XPLMFindPluginsMenu(), PluginMenuIdx, MenuHandler, nullptr);
+
+	MenuToggleAircraftLabels = XPLMAppendMenuItemWithCommand(PluginMenu, "Aircraft Labels", ToggleAircraftLabelsCommand);
+}
+
+
+void UpdateMenuItems()
+{
+	// XPLMSetMenuItemName(PluginMenu, MenuDefaultAtis, environment->IsXplaneAtisDisabled() ? "X-Plane ATIS: Disabled" : "X-Plane ATIS: Enabled", 0);
+	// XPLMSetMenuItemName(PluginMenu, MenuToggleTcas, XPMPHasControlOfAIAircraft() ? "Release TCAS Control" : "Request TCAS Control", 0);
+	XPLMSetMenuItemName(PluginMenu, MenuToggleAircraftLabels, unifly::Config::GetInstance().GetShowHideLabels() ? "Aircraft Labels: On" : "Aircraft Labels: Off", 0);
+}
+
+int ToggleAircraftLabelsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
+{
+	if (inPhase == xplm_CommandEnd)
+	{
+		bool enabled = !unifly::Config::GetInstance().GetShowHideLabels();
+		unifly::Config::GetInstance().SetShowHideLabels(enabled);
+		unifly::Config::GetInstance().SaveConfig();
+		XPMPEnableAircraftLabels(enabled);
+	}
+	return 0;
+}
+
 
 }

@@ -19,9 +19,6 @@ include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
 
 # Protobuf paths
-#set(Protobuf_INCLUDE_DIR "${ARCH_ROOT}/include")
-#set(Protobuf_LIBRARY "${ARCH_ROOT}/lib/libprotobuf.dylib")
-#set(Protobuf_PROTOC_EXECUTABLE "${ARCH_ROOT}/bin/protoc")
 find_package(Protobuf CONFIG REQUIRED)
 
 message(STATUS "Protobuf version: ${Protobuf_VERSION}")
@@ -34,7 +31,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 file(
     REAL_PATH
-    "${CMAKE_CURRENT_SOURCE_DIR}/schema/unifly/schema/v1"
+    "${CMAKE_CURRENT_SOURCE_DIR}/schema"
     PROTO_IMPORT_DIR
 )
 message("PROTO SCHEMAS = ${PROTO_IMPORT_DIR}")
@@ -71,6 +68,7 @@ set(INCLUDES
   inc/plugin.h
   inc/unifly.h
   inc/socket.h
+  inc/config.h
   inc/aircraft_manager.h
   inc/network_aircraft.h
   inc/terrain_probe.h
@@ -88,6 +86,7 @@ set(SRC
   src/plugin.cpp
   src/unifly.cpp
   src/socket.cpp
+  src/config.cpp
   src/aircraft_manager.cpp
   src/network_aircraft.cpp
   src/terrain_probe.cpp

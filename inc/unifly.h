@@ -1,13 +1,13 @@
 #pragma once
 
 // Change the expected unifly plugin version in net_shared.rs
+#include "settings.pb.h"
 #define UNIFLY_PLUGIN_VERSION 120
 
 #include "data_ref_access.h"
 #include "data_ref_owned.h"
 #include "utilities.h"
 #include "socket.h"
-#include <thread>
 
 using asio::ip::tcp;
 

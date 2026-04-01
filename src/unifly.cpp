@@ -5,6 +5,7 @@
 #include "pilot_local.pb.h"
 #include "utilities.h"
 #include "socket.h"
+#include "config.h"
 
 #include "XPLMUtilities.h"
 #include "XPMPMultiplayer.h"
@@ -147,7 +148,6 @@ namespace unifly
 			instance->InvokeQueuedCallbacks();
 			instance->m_aiControlled = XPMPHasControlOfAIAircraft();
 			instance->m_aircraftCount = XPMPCountPlanes();
-			// UpdateMenuItems();
 
 			// Send event frame
 			unifly::schema::v1::XPLMMessage event_frame_message;
@@ -313,6 +313,12 @@ namespace unifly
 				    m_aircraftManager->HandleReportContext(msg.remote_report_context());
 				});
 				break;
+			}
+			case unifly::schema::v1::XPlaneMessage::kSettings: {
+    			QueueCallback([msg = std::move(msg), this]()
+    			{
+                    Config::GetInstance().LoadConfig(msg.settings());
+    			});
 			}
 			case unifly::schema::v1::XPlaneMessage::KIND_NOT_SET: {
 			    break;

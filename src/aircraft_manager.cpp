@@ -73,8 +73,6 @@ namespace unifly
 
     void AircraftManager::HandleDespawn(const int peer_id)
     {
-        // auto aircraft = GetAircraft(peer_id);
-        // if(!aircraft) return;
         mapPlanes.erase(peer_id);
     }
 
