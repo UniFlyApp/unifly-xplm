@@ -43,6 +43,7 @@
 #include "XPLMUtilities.h"
 
 // Asio
+#define ASIO_NO_DEPRECATED
 #include <asio.hpp>
 
 // Protobuf
