@@ -93,6 +93,8 @@ namespace unifly
             return false;
 		if (!strcmp(item, XPMP_CFG_ITM_CLAMPALL))
 			return true;
+		if (!strcmp(item, XPMP_CFG_ITM_MUTE_ON_PAUSE))
+		    return true;
 		return defaultVal;
 	}
 
