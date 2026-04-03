@@ -1,4 +1,5 @@
 #include "plugin.h"
+#include "XPLMMenus.h"
 #include "utilities.h"
 #include "unifly.h"
 #include "config.h"
@@ -8,6 +9,9 @@
 namespace unifly {
 
 std::unique_ptr<unifly::UniFly> environment;
+
+void CreateMenuItems();
+void EnableMenuItems(int enabled);
 
 PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescription)
 {
@@ -22,6 +26,7 @@ PLUGIN_API int XPluginStart(char* outName, char* outSignature, char* outDescript
 	{
 		XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
 		XPMPSetPluginName("UniFly");
+		CreateMenuItems();
 		LOG_MSG("XPluginStart. Version = %d", UNIFLY_PLUGIN_VERSION);
 	}
 	catch (const std::exception& e)
@@ -111,18 +116,25 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID from, int msg, void* inParam)
 
 }
 
-void RegisterMenuItems() {
+void MenuHandler(void* mRef, void* iRef)
+{}
+
+void CreateMenuItems() {
     // Commands
    	ToggleAircraftLabelsCommand = XPLMCreateCommand("unifly/toggle_aircraft_labels", "UniFly: Toggle Aircraft Labels");
-	XPLMRegisterCommandHandler(ToggleAircraftLabelsCommand, ToggleAircraftLabelsCommandHandler, 1, (void*)0);
 
-	// Menu
-	PluginMenuIdx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "UniFly", nullptr, 0);
-	PluginMenu = XPLMCreateMenu("xPilot", XPLMFindPluginsMenu(), PluginMenuIdx, MenuHandler, nullptr);
+    // Menu
+    PluginMenuIdx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "UniFly", nullptr, 0);
+    PluginMenu = XPLMCreateMenu("UniFly", XPLMFindPluginsMenu(), PluginMenuIdx, MenuHandler, nullptr);
 
-	MenuToggleAircraftLabels = XPLMAppendMenuItemWithCommand(PluginMenu, "Aircraft Labels", ToggleAircraftLabelsCommand);
+    MenuToggleAircraftLabels = XPLMAppendMenuItemWithCommand(PluginMenu, "Aircraft Labels", ToggleAircraftLabelsCommand);
+
+    EnableMenuItems(false);
 }
 
+void EnableMenuItems(int enabled) {
+    XPLMEnableMenuItem(PluginMenu, MenuToggleAircraftLabels, enabled);
+}
 
 void UpdateMenuItems()
 {
@@ -131,17 +143,20 @@ void UpdateMenuItems()
 	XPLMSetMenuItemName(PluginMenu, MenuToggleAircraftLabels, unifly::Config::GetInstance().GetShowHideLabels() ? "Aircraft Labels: On" : "Aircraft Labels: Off", 0);
 }
 
-int ToggleAircraftLabelsCommandHandler(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* inRefcon)
-{
-	if (inPhase == xplm_CommandEnd)
-	{
-		bool enabled = !unifly::Config::GetInstance().GetShowHideLabels();
-		unifly::Config::GetInstance().SetShowHideLabels(enabled);
-		unifly::Config::GetInstance().SaveConfig();
-		XPMPEnableAircraftLabels(enabled);
-	}
-	return 0;
+int HandleToggleAircraftLabelsCommand(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* ref)
+   {
+       if (inPhase == xplm_CommandEnd)
+        {
+            auto* instance = static_cast<UniFly*>(ref);
+      		if (instance)
+      		{
+      			bool enabled = !unifly::Config::GetInstance().GetShowHideLabels();
+      			unifly::Config::GetInstance().SetShowHideLabels(enabled);
+      			unifly::Config::GetInstance().SaveConfig(instance);
+      			XPMPEnableAircraftLabels(enabled);
+            }
+        }
+       return 0;
 }
-
 
 }

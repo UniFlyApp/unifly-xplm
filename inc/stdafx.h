@@ -49,3 +49,5 @@
 // Protobuf
 #include "message.pb.h"
 #include "pilot_local.pb.h"
+#include "pilot_remote.pb.h"
+#include "settings.pb.h"

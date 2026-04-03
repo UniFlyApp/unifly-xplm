@@ -3,6 +3,7 @@
 #include "data_ref_access.h"
 #include "message.pb.h"
 #include "pilot_local.pb.h"
+#include "plugin.h"
 #include "utilities.h"
 #include "socket.h"
 #include "config.h"
@@ -64,7 +65,10 @@ namespace unifly
         LOG_MSG("init");
         InitializeXPMP();
         TryGetTcasControl();
+
         XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
+
+        XPLMRegisterCommandHandler(ToggleAircraftLabelsCommand, HandleToggleAircraftLabelsCommand, 1, this);
 
         m_keepSocketAlive.store(true);
         m_socketThread = std::make_unique<std::thread>(&UniFly::SocketWorker, this);
@@ -144,6 +148,7 @@ namespace unifly
 		if (instance)
 		{
 		    FlushMsgs();
+			UpdateMenuItems();
 
 			instance->InvokeQueuedCallbacks();
 			instance->m_aiControlled = XPMPHasControlOfAIAircraft();
@@ -233,8 +238,10 @@ namespace unifly
                 m_socket = socket;
 
                 try {
-                    // Send Open
+                    // Send Open & Enable Menu Items
                     QueueCallback([=] {
+                        EnableMenuItems(true);
+
                         unifly::schema::v1::XPLMMessage open_msg;
                         unifly::schema::v1::EventOpen* open = open_msg.mutable_event_open();
                         open->set_version_xplm(XPLMVersion);
@@ -272,6 +279,7 @@ namespace unifly
 
                     QueueCallback([=] {
                         DeleteAllAircraft();
+                        EnableMenuItems(false);
                     });
                 } catch (std::exception& e) {
                     LOG_MSG("UniFly: Connection closed: %s", e.what());

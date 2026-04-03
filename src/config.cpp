@@ -19,6 +19,7 @@ namespace unifly {
 
 	void Config::SaveConfig(UniFly* instance)
 	{
+        LOG_MSG("save config");
 	    unifly::schema::v1::XPLMMessage settings_message;
 		unifly::schema::v1::Settings* settings = settings_message.mutable_settings();
 		settings->set_labels_show(GetShowHideLabels());
