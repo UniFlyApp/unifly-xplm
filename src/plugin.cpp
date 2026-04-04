@@ -5,6 +5,7 @@
 #include "config.h"
 
 #include "XPMPMultiplayer.h"
+#include <cstdio>
 
 namespace unifly {
 
@@ -117,46 +118,144 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID from, int msg, void* inParam)
 }
 
 void MenuHandler(void* mRef, void* iRef)
-{}
+{
+    UpdateMenuItems();
+}
 
 void CreateMenuItems() {
     // Commands
-   	ToggleAircraftLabelsCommand = XPLMCreateCommand("unifly/toggle_aircraft_labels", "UniFly: Toggle Aircraft Labels");
+   	CommandAircraftLabelShow = XPLMCreateCommand("unifly/aircraft_label_show", "UniFly: Toggle Aircraft Labels");
+   	CommandAircraftLabelType = XPLMCreateCommand("unifly/aircraft_label_type", "UniFly: Cycle Aircraft Labels type");
+   	CommandAircraftLabelColour = XPLMCreateCommand("unifly/aircraft_label_colour", "UniFly: Cycle Aircraft Labels colour");
+   	CommandAircraftLabelRange = XPLMCreateCommand("unifly/aircraft_label_range", "UniFly: Cycle Aircraft Labels range");
+   	CommandAircraftLabelVisibilityCutoff = XPLMCreateCommand("unifly/aircraft_label_visibility_cutoff", "UniFly: Toggle Aircraft Labels Visibility Cutoff");
 
-    // Menu
-    PluginMenuIdx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "UniFly", nullptr, 0);
-    PluginMenu = XPLMCreateMenu("UniFly", XPLMFindPluginsMenu(), PluginMenuIdx, MenuHandler, nullptr);
+    // Menus
+    PluginMenuUniFlyIdx = XPLMAppendMenuItem(XPLMFindPluginsMenu(), "UniFly", nullptr, 0);
+    PluginMenuUniFly = XPLMCreateMenu("UniFly", XPLMFindPluginsMenu(), PluginMenuUniFlyIdx, MenuHandler, nullptr);
 
-    MenuToggleAircraftLabels = XPLMAppendMenuItemWithCommand(PluginMenu, "Aircraft Labels", ToggleAircraftLabelsCommand);
+    PluginMenuAircraftLabelIdx = XPLMAppendMenuItem(PluginMenuUniFly, "Aircraft Labels", nullptr, 0);
+    PluginMenuAircraftLabel = XPLMCreateMenu("Aircraft Labels", PluginMenuUniFly, PluginMenuAircraftLabelIdx, nullptr, nullptr);
+
+    // Menu Commands
+    MenuAircraftLabelShow = XPLMAppendMenuItemWithCommand(PluginMenuAircraftLabel, "Show", CommandAircraftLabelShow);
+    MenuAircraftLabelType = XPLMAppendMenuItemWithCommand(PluginMenuAircraftLabel, "Type", CommandAircraftLabelType);
+    MenuAircraftLabelColour = XPLMAppendMenuItemWithCommand(PluginMenuAircraftLabel, "Colour", CommandAircraftLabelColour);
+    MenuAircraftLabelRange = XPLMAppendMenuItemWithCommand(PluginMenuAircraftLabel, "Range", CommandAircraftLabelRange);
+    MenuAircraftLabelVisibilityCutoff = XPLMAppendMenuItemWithCommand(PluginMenuAircraftLabel, "Visibility Cutoff", CommandAircraftLabelVisibilityCutoff);
 
     EnableMenuItems(false);
 }
 
 void EnableMenuItems(int enabled) {
-    XPLMEnableMenuItem(PluginMenu, MenuToggleAircraftLabels, enabled);
+    XPLMEnableMenuItem(PluginMenuAircraftLabel, MenuAircraftLabelShow, enabled);
+    XPLMEnableMenuItem(PluginMenuAircraftLabel, MenuAircraftLabelType, false); //TODO: Coming soon
+    XPLMEnableMenuItem(PluginMenuAircraftLabel, MenuAircraftLabelColour, false); //TODO: Coming soon
+    XPLMEnableMenuItem(PluginMenuAircraftLabel, MenuAircraftLabelRange, enabled);
+    XPLMEnableMenuItem(PluginMenuAircraftLabel, MenuAircraftLabelVisibilityCutoff, enabled);
 }
 
 void UpdateMenuItems()
 {
-	// XPLMSetMenuItemName(PluginMenu, MenuDefaultAtis, environment->IsXplaneAtisDisabled() ? "X-Plane ATIS: Disabled" : "X-Plane ATIS: Enabled", 0);
-	// XPLMSetMenuItemName(PluginMenu, MenuToggleTcas, XPMPHasControlOfAIAircraft() ? "Release TCAS Control" : "Request TCAS Control", 0);
-	XPLMSetMenuItemName(PluginMenu, MenuToggleAircraftLabels, unifly::Config::GetInstance().GetShowHideLabels() ? "Aircraft Labels: On" : "Aircraft Labels: Off", 0);
+    static char aircraftLabelType[64];
+    static char aircraftLabelColour[64];
+    static char aircraftLabelRange[64];
+
+    snprintf(aircraftLabelType, sizeof(aircraftLabelType), "Type: %s", AircraftLabelTypeToString(unifly::Config::GetInstance().GetAircraftLabelType()));
+    snprintf(aircraftLabelColour, sizeof(aircraftLabelColour), "Colour: %s", AircraftLabelColourToString(unifly::Config::GetInstance().GetAircraftLabelColour()));
+    snprintf(aircraftLabelRange, sizeof(aircraftLabelRange), "Range: %s", AircraftLabelRangeToString(unifly::Config::GetInstance().GetAircraftLabelRange()));
+
+    XPLMSetMenuItemName(PluginMenuAircraftLabel, MenuAircraftLabelShow, unifly::Config::GetInstance().GetAircraftLabelShow() ? "Show: On" : "Show: Off", 0);
+    XPLMSetMenuItemName(PluginMenuAircraftLabel, MenuAircraftLabelType, aircraftLabelType, 0);
+    XPLMSetMenuItemName(PluginMenuAircraftLabel, MenuAircraftLabelColour, aircraftLabelColour, 0);
+    XPLMSetMenuItemName(PluginMenuAircraftLabel, MenuAircraftLabelRange, aircraftLabelRange, 0);
+	XPLMSetMenuItemName(PluginMenuAircraftLabel, MenuAircraftLabelVisibilityCutoff, unifly::Config::GetInstance().GetAircraftLabelVisibilityCutoff() ? "Visibility Cutoff: On" : "Visibility Cutoff: Off", 0);
 }
 
-int HandleToggleAircraftLabelsCommand(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* ref)
-   {
-       if (inPhase == xplm_CommandEnd)
-        {
-            auto* instance = static_cast<UniFly*>(ref);
-      		if (instance)
-      		{
-      			bool enabled = !unifly::Config::GetInstance().GetShowHideLabels();
-      			unifly::Config::GetInstance().SetShowHideLabels(enabled);
-      			unifly::Config::GetInstance().SaveConfig(instance);
-      			XPMPEnableAircraftLabels(enabled);
-            }
-        }
-       return 0;
+void EnactMenuItems() {
+    XPMPEnableAircraftLabels(Config::GetInstance().GetAircraftLabelShow());
+    XPMPSetAircraftLabelDist(AircraftLabelRangeValue(Config::GetInstance().GetAircraftLabelRange()), Config::GetInstance().GetAircraftLabelVisibilityCutoff());
+    // Colour and type are enacted elsewhere TODO
 }
+
+int HandleCommandAircraftLabelShow(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* ref)
+{
+    if (inPhase == xplm_CommandEnd) {
+        auto* instance = static_cast<UniFly*>(ref);
+   		if (instance) {
+   			auto next = !unifly::Config::GetInstance().GetAircraftLabelShow();
+   			unifly::Config::GetInstance().SetAircraftLabelShow(next);
+   			unifly::Config::GetInstance().SaveConfig(instance);
+
+            EnactMenuItems();
+        }
+    }
+    return 0;
+
+}
+
+int HandleCommandAircraftLabelType(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* ref)
+{
+
+    if (inPhase == xplm_CommandEnd) {
+        auto* instance = static_cast<UniFly*>(ref);
+   		if (instance) {
+            auto next = AircraftLabelTypeNext(Config::GetInstance().GetAircraftLabelType());
+   			unifly::Config::GetInstance().SetAircraftLabelShow(next);
+   			unifly::Config::GetInstance().SaveConfig(instance);
+
+            EnactMenuItems();
+        }
+    }
+    return 0;
+}
+
+int HandleCommandAircraftLabelColour(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* ref)
+{
+
+    if (inPhase == xplm_CommandEnd) {
+        auto* instance = static_cast<UniFly*>(ref);
+   		if (instance) {
+         auto next = AircraftLabelColourNext(Config::GetInstance().GetAircraftLabelColour());
+			unifly::Config::GetInstance().SetAircraftLabelColour(next);
+			unifly::Config::GetInstance().SaveConfig(instance);
+
+			EnactMenuItems();
+        }
+    }
+    return 0;
+}
+
+int HandleCommandAircraftLabelRange(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* ref)
+{
+
+    if (inPhase == xplm_CommandEnd) {
+        auto* instance = static_cast<UniFly*>(ref);
+   		if (instance) {
+            auto next = AircraftLabelRangeNext(Config::GetInstance().GetAircraftLabelRange());
+			unifly::Config::GetInstance().SetAircraftLabelRange(next);
+			unifly::Config::GetInstance().SaveConfig(instance);
+
+			EnactMenuItems();
+        }
+    }
+    return 0;
+}
+
+int HandleCommandAircraftLabelVisibilityCutoff(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void* ref)
+{
+    if (inPhase == xplm_CommandEnd) {
+        auto* instance = static_cast<UniFly*>(ref);
+   		if (instance) {
+ 			auto next = !unifly::Config::GetInstance().GetAircraftLabelVisibilityCutoff();
+ 			unifly::Config::GetInstance().SetAircraftLabelVisibilityCutoff(next);
+ 			unifly::Config::GetInstance().SaveConfig(instance);
+
+            EnactMenuItems();
+        }
+    }
+    return 0;
+}
+
 
 }

@@ -68,7 +68,11 @@ namespace unifly
 
         XPLMRegisterFlightLoopCallback(MainFlightLoop, -1.0f, this);
 
-        XPLMRegisterCommandHandler(ToggleAircraftLabelsCommand, HandleToggleAircraftLabelsCommand, 1, this);
+        XPLMRegisterCommandHandler(CommandAircraftLabelShow, HandleCommandAircraftLabelShow, 1, this);
+        XPLMRegisterCommandHandler(CommandAircraftLabelType, HandleCommandAircraftLabelType, 1, this);
+        XPLMRegisterCommandHandler(CommandAircraftLabelRange, HandleCommandAircraftLabelRange, 1, this);
+        XPLMRegisterCommandHandler(CommandAircraftLabelColour, HandleCommandAircraftLabelColour, 1, this);
+        XPLMRegisterCommandHandler(CommandAircraftLabelVisibilityCutoff, HandleCommandAircraftLabelVisibilityCutoff, 1, this);
 
         m_keepSocketAlive.store(true);
         m_socketThread = std::make_unique<std::thread>(&UniFly::SocketWorker, this);
@@ -123,14 +127,7 @@ namespace unifly
             return false;
         }
 
-        // TODO: check these
-    	// XPMPEnableAircraftLabels(Config::GetInstance().GetShowHideLabels());
-    	// XPMPSetAircraftLabelDist(Config::GetInstance().GetMaxLabelDistance(), Config::GetInstance().GetLabelCutoffVis());
-
-
-        // TODO: ASAP!
         // XPMPSetAudioDevice(Config::GetInstance().GetAudioDevice());
-
     	return true;
 	}
 
@@ -148,7 +145,6 @@ namespace unifly
 		if (instance)
 		{
 		    FlushMsgs();
-			UpdateMenuItems();
 
 			instance->InvokeQueuedCallbacks();
 			instance->m_aiControlled = XPMPHasControlOfAIAircraft();
@@ -239,7 +235,7 @@ namespace unifly
 
                 try {
                     // Send Open & Enable Menu Items
-                    QueueCallback([=] {
+                    QueueCallback([=, this] {
                         EnableMenuItems(true);
 
                         unifly::schema::v1::XPLMMessage open_msg;
@@ -277,7 +273,7 @@ namespace unifly
 
                     m_socket = nullptr;
 
-                    QueueCallback([=] {
+                    QueueCallback([this] {
                         DeleteAllAircraft();
                         EnableMenuItems(false);
                     });

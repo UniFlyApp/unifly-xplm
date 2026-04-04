@@ -3,9 +3,38 @@ syntax = "proto3";
 package unifly.schema.v1;
 
 message Settings {
-    bool labels_show = 1;
-    float labels_max_dist = 2;
+  bool aircraft_label_show = 1;
+  AircraftLabelType aircraft_label_type = 2;
+  AircraftLabelColour aircraft_label_colour = 3;
+  AircraftLabelRange aircraft_label_range = 4;
+  bool aircraft_label_visibility_cutoff = 5;
 
-    bool sounds_enabled = 3;
-    string sounds_device = 4;
+  // bool sounds_enabled = 3;
+  // string sounds_device = 4;
+}
+
+enum AircraftLabelType {
+  AIRCRAFT_LABEL_TYPE_UNSPECIFIED = 0;
+  AIRCRAFT_LABEL_TYPE_AIRCRAFT = 1;
+  AIRCRAFT_LABEL_TYPE_AIRLINE = 2;
+  AIRCRAFT_LABEL_TYPE_CALLSIGN = 3;
+  AIRCRAFT_LABEL_TYPE_CALLSIGN_AIRCRAFT = 4;
+  AIRCRAFT_LABEL_TYPE_CALLSIGN_AIRCRAFT_AIRLINE = 5;
+}
+
+enum AircraftLabelRange {
+  AIRCRAFT_LABEL_RANGE_UNSPECIFIED = 0;
+  AIRCRAFT_LABEL_RANGE_MILES_1 = 1;
+  AIRCRAFT_LABEL_RANGE_MILES_3 = 3;
+  AIRCRAFT_LABEL_RANGE_MILES_5 = 4;
+  AIRCRAFT_LABEL_RANGE_MILES_10 = 5;
+  AIRCRAFT_LABEL_RANGE_MILES_20 = 6;
+}
+
+enum AircraftLabelColour {
+  AIRCRAFT_LABEL_COLOUR_UNSPECIFIED = 0;
+  AIRCRAFT_LABEL_COLOUR_YELLOW = 1;
+  AIRCRAFT_LABEL_COLOUR_RED = 2;
+  AIRCRAFT_LABEL_COLOUR_GREEN = 3;
+  AIRCRAFT_LABEL_COLOUR_BLUE = 4;
 }
