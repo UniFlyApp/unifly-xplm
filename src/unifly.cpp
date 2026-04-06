@@ -235,7 +235,7 @@ namespace unifly
 
                 try {
                     // Send Open & Enable Menu Items
-                    QueueCallback([=, this] {
+                    QueueCallback([this] {
                         EnableMenuItems(true);
 
                         unifly::schema::v1::XPLMMessage open_msg;
