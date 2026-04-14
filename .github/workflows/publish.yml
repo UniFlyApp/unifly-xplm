@@ -25,10 +25,11 @@ jobs:
       - name: Setup vcpkg
         run: |
           git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
-          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $env:GITHUB_ENV
+          ./vcpkg/bootstrap-vcpkg.sh
 
       - name: Build
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: |
           mkdir build
           cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
@@ -43,7 +44,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: build-windows
+          name: build-linux
           retention-days: 2
           path: |
             build/lin_x64/UniFly-XPLM.xpl
@@ -58,14 +59,15 @@ jobs:
       - name: Setup vcpkg
         run: |
           git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
-          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $env:GITHUB_ENV
+          ./vcpkg/bootstrap-vcpkg.sh
 
       - name: Build
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: |
-          arch -x86_64 /usr/local/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
+          arch -x86_64 /usr/local/bin/cmake -B build_x86_64 -DCMAKE_BUILD_TYPE=Release --preset=mac-x86_64
           arch -x86_64 /usr/local/bin/cmake --build build_x86_64
-          arch -arm64 /opt/homebrew/bin/cmake  -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
+          arch -arm64 /opt/homebrew/bin/cmake -B build_arm64 -DCMAKE_BUILD_TYPE=Release --preset=mac-arm64
           arch -arm64 /opt/homebrew/bin/cmake --build build_arm64
           lipo -create build_x86_64/UniFly-XPLM.xpl build_arm64/UniFly-XPLM.xpl -output UniFly-XPLM.xpl
 
@@ -88,9 +90,10 @@ jobs:
         run: |
           git clone https://github.com/microsoft/vcpkg.git
           .\vcpkg\bootstrap-vcpkg.bat
-          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $env:GITHUB_ENV
 
       - name: Build
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: |
           mkdir build
           cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
