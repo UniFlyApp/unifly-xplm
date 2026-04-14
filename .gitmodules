@@ -1,3 +1,6 @@
 [submodule "dep/XPMP2"]
 	path = dep/XPMP2
 	url = git@github.com:TwinFan/XPMP2.git
+[submodule "vcpkg"]
+	path = vcpkg
+	url = https://github.com/microsoft/vcpkg

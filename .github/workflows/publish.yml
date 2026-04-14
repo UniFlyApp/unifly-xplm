@@ -22,22 +22,30 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup vcpkg
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          ./vcpkg/bootstrap-vcpkg.sh
+      - name: Setup OpenGL
+        uses: openrndr/setup-opengl@v1.1
 
-      - name: Build
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-        run: |
-          mkdir build
-          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
-          cmake --build build
+      - uses: lukka/get-cmake@latest
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+
+      - name: Build (cmake)
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: "default"
+          # configurePresetAdditionalArgs: "['-DCMAKE_BUILD_TYPE=Release']"
+
+          buildPreset: "default"
+          buildPresetAdditionalArgs: "['--config Release']"
+
+          testPreset: "default"
+          testPresetAdditionalArgs: "['--config Release']"
 
       - name: List build dir
         run: |
           cd build
+          ls
           cd lin_x64
           ls
 
@@ -51,6 +59,7 @@ jobs:
 
   build_macos:
     runs-on: "macos-latest"
+    if: false
     steps:
       - uses: actions/checkout@v6
         with:
@@ -86,18 +95,29 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup vcpkg
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
+      - uses: lukka/get-cmake@latest
 
-      - name: Build
-        env:
-          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+
+      - name: Build (cmake)
+        uses: lukka/run-cmake@v10
+        with:
+          configurePreset: "default"
+          # configurePresetAdditionalArgs: "['-DCMAKE_BUILD_TYPE=Release']"
+
+          buildPreset: "default"
+          buildPresetAdditionalArgs: "['--config Release']"
+
+          testPreset: "default"
+          testPresetAdditionalArgs: "['--config Release']"
+
+      - name: List build dir
         run: |
-          mkdir build
-          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
-          cmake --build build
+          cd build
+          ls
+          cd win_x64
+          ls
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
@@ -111,7 +131,7 @@ jobs:
             build/win_x64/libprotobuf.dll
 
   publish:
-    needs: [build_macos, build_windows, build_linux]
+    needs: [build_windows, build_linux]
     runs-on: [self-hosted, macOS, ARM64]
     steps:
       - uses: actions/checkout@v6
