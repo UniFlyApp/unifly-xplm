@@ -22,8 +22,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup OpenGL
-        uses: openrndr/setup-opengl@v1.1
+      - name: Install required libs # We want Ninja and OpenGL libs
+        shell: bash
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y libglu1-mesa-dev freeglut3-dev mesa-common-dev
 
       - uses: lukka/get-cmake@latest
 
