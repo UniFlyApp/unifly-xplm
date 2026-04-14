@@ -65,10 +65,10 @@ jobs:
         env:
           VCPKG_ROOT: ${{ github.workspace }}/vcpkg
         run: |
-          arch -x86_64 /usr/local/bin/cmake -B build_x86_64 -DCMAKE_BUILD_TYPE=Release --preset=mac-x86_64
-          arch -x86_64 /usr/local/bin/cmake --build build_x86_64
-          arch -arm64 /opt/homebrew/bin/cmake -B build_arm64 -DCMAKE_BUILD_TYPE=Release --preset=mac-arm64
-          arch -arm64 /opt/homebrew/bin/cmake --build build_arm64
+          arch -x86_64 cmake -B build_x86_64 -DCMAKE_BUILD_TYPE=Release --preset=mac-x86_64
+          arch -x86_64 cmake --build build_x86_64
+          arch -arm64 cmake -B build_arm64 -DCMAKE_BUILD_TYPE=Release --preset=mac-arm64
+          arch -arm64 cmake --build build_arm64
           lipo -create build_x86_64/UniFly-XPLM.xpl build_arm64/UniFly-XPLM.xpl -output UniFly-XPLM.xpl
 
       - name: Upload build artifacts
