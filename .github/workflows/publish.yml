@@ -38,12 +38,10 @@ jobs:
         with:
           configurePreset: "default"
           # configurePresetAdditionalArgs: "['-DCMAKE_BUILD_TYPE=Release']"
-
-          buildPreset: "default"
-          buildPresetAdditionalArgs: "['--config Release']"
-
-          testPreset: "default"
-          testPresetAdditionalArgs: "['--config Release']"
+          # buildPreset: "default"
+          # buildPresetAdditionalArgs: "['--config Release']"
+          # testPreset: "default"
+          # testPresetAdditionalArgs: "['--config Release']"
 
       - name: List build dir
         run: |
