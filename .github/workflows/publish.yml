@@ -1,4 +1,4 @@
-name: "publish (self-hosted)"
+name: "publish"
 
 on:
   workflow_dispatch:
@@ -15,16 +15,53 @@ on:
 run-name: Build release v${{ inputs.version }}
 
 jobs:
-  build_macos:
-    runs-on: [self-hosted, macOS, ARM64]
+  build_linux:
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
 
+      - name: Setup vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $env:GITHUB_ENV
+
       - name: Build
-        env:
-          VCPKG_ROOT: /Users/tom/Documents/Coding/vcpkg/scripts/buildsystems/vcpkg.cmake
+        run: |
+          mkdir build
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
+          cmake --build build
+
+      - name: List build dir
+        run: |
+          cd build
+          cd lin_x64
+          ls
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-windows
+          retention-days: 2
+          path: |
+            build/lin_x64/UniFly-XPLM.xpl
+
+  build_macos:
+    runs-on: "macos-latest"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $env:GITHUB_ENV
+
+      - name: Build
         run: |
           arch -x86_64 /usr/local/bin/cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
           arch -x86_64 /usr/local/bin/cmake --build build_x86_64
@@ -41,17 +78,19 @@ jobs:
             UniFly-XPLM.xpl
 
   build_windows:
-    runs-on: [self-hosted, Windows, X64]
+    runs-on: "windows-latest"
     steps:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Setup vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+          echo "VCPKG_ROOT=$GITHUB_WORKSPACE/vcpkg" >> $env:GITHUB_ENV
 
       - name: Build
-        env:
-          VCPKG_ROOT: C:/Coding/vcpkg/scripts/buildsystems/vcpkg.cmake
         run: |
           mkdir build
           cmake -G Ninja -DCMAKE_BUILD_TYPE=Release --preset=default
@@ -69,7 +108,7 @@ jobs:
             build/win_x64/libprotobuf.dll
 
   publish:
-    needs: [build_macos, build_windows]
+    needs: [build_macos, build_windows, build_linux]
     runs-on: [self-hosted, macOS, ARM64]
     steps:
       - uses: actions/checkout@v6
@@ -81,7 +120,8 @@ jobs:
       - name: Bundle
         run: |
           ls -R artifacts
-          mkdir -p UniFly-XPLM/mac_x64 UniFly-XPLM/win_x64
+          mkdir -p UniFly-XPLM/lin_x64 UniFly-XPLM/mac_x64 UniFly-XPLM/win_x64
+          mv artifacts/build-linux/UniFly-XPLM.xpl UniFly-XPLM/lin_x64/UniFly-XPLM.xpl
           mv artifacts/build-macos/UniFly-XPLM.xpl UniFly-XPLM/mac_x64/UniFly-XPLM.xpl
           mv artifacts/build-windows/UniFly-XPLM.xpl UniFly-XPLM/win_x64/UniFly-XPLM.xpl
           mv artifacts/build-windows/UniFly-XPLM.pdb UniFly-XPLM/win_x64/UniFly-XPLM.pdb
