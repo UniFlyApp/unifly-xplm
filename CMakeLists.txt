@@ -17,6 +17,8 @@ file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
 include_directories(${CMAKE_SOURCE_DIR}/inc)
 include_directories(${CMAKE_SOURCE_DIR}/dep/SDK/CHeaders/XPLM)
 
+message(STATUS "Compiler ID: ${CMAKE_CXX_COMPILER_ID}")
+message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
 
 # Protobuf paths
 find_package(Protobuf CONFIG REQUIRED)
