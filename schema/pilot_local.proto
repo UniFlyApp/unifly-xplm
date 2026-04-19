@@ -9,7 +9,8 @@ message LocalReadFrequent {
   double bank = 4;
   double heading = 5;
 
-  float ground_speed = 6;
+  float speed_ground = 6;
+  float speed_air_mach = 14;
   float vertical_speed = 7;
   bool on_ground = 8;
 
