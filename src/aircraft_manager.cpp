@@ -107,7 +107,7 @@ namespace unifly
         aircraft->SetSlatRatio(remote_report_context.flaps());
         aircraft->SetSpoilerRatio(remote_report_context.spoilers());
         aircraft->SetSpeedbrakeRatio(remote_report_context.spoilers());
-        aircraft->SetGearRatio(remote_report_context.gear() ? 1.0f : 0.0f); //TODO: Add || on ground once I verify that this doesn't need ! or summat
+        aircraft->SetGearRatio(remote_report_context.gear() ? 1.0f : 0.0f);
         aircraft->SetLightsStrobe(remote_report_context.lights_strobe());
         aircraft->SetLightsTaxi(remote_report_context.lights_taxi());
         aircraft->SetLightsNav(remote_report_context.lights_nav());
@@ -136,6 +136,8 @@ namespace unifly
                     double lat = plane.second->visual_state.lat;
                     double lon = plane.second->visual_state.lon;
                     double elevation = plane.second->terrain_probe.GetTerrainElevation(lat, lon);
+                    float cg_height = plane.second->GetVertOfs();
+
 
                     unifly::schema::v1::XPLMMessage event_elevation_message;
                     unifly::schema::v1::RemoteReceiveElevation* event_elevation = event_elevation_message.mutable_remote_elevation();
@@ -143,7 +145,9 @@ namespace unifly
                     event_elevation->set_lat(lat);
                     event_elevation->set_lon(lon);
                     event_elevation->set_elevation(elevation);
-                    event_elevation->set_cg_height(0.0); //TODO
+                    event_elevation->set_cg_height(cg_height);
+
+
                     instance->mEnv->send_msg(event_elevation_message);
                 }
             }
