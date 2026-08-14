@@ -42,13 +42,14 @@ message RemoteReportPosition {
   double heading = 6;
 
   double alt_msl = 7;
+
+  bool on_ground = 8;
 }
 
 message RemoteReportContext {
   uint32 peer_id = 1;
 
   bool engines = 2;
-  bool on_ground = 3;
   float flaps = 4;
   float spoilers = 5;
   bool gear = 6;
