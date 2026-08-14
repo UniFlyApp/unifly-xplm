@@ -1,4 +1,5 @@
 #include "unifly.h"
+#include "XPLMGraphics.h"
 #include "aircraft_manager.h"
 #include "data_ref_access.h"
 #include "message.pb.h"
@@ -19,8 +20,8 @@ using asio::ip::tcp;
 namespace unifly
 {
     UniFly::UniFly() :
-        m_aiControlled("unifly/ai_controlled", ReadOnly),
-        m_aircraftCount("unifly/num_aircraft", ReadOnly),
+        m_aiControlled("unifly/ai_controlled", ReadWrite),
+        m_aircraftCount("unifly/num_aircraft", ReadWrite),
 
         m_beaconLights("sim/cockpit2/switches/beacon_on", ReadOnly),
         m_landingLights("sim/cockpit2/switches/landing_lights_on", ReadOnly),
@@ -47,7 +48,14 @@ namespace unifly
         m_onGround("sim/flightmodel/failures/onground_any", ReadOnly),
         m_gearDown("sim/cockpit/switches/gear_handle_status", ReadOnly),
         m_flapRatio("sim/flightmodel/controls/flaprat", ReadOnly),
-        m_speedbrakeRatio("sim/cockpit2/controls/speedbrake_ratio", ReadOnly)
+        m_speedbrakeRatio("sim/cockpit2/controls/speedbrake_ratio", ReadOnly),
+
+        m_positionX("sim/flightmodel/position/local_x", ReadWrite),
+        m_positionY("sim/flightmodel/position/local_y", ReadWrite),
+        m_positionZ("sim/flightmodel/position/local_z", ReadWrite),
+        m_velocityX("sim/flightmodel/position/local_vx", ReadWrite),
+        m_velocityY("sim/flightmodel/position/local_vy", ReadWrite),
+        m_velocityZ("sim/flightmodel/position/local_vz", ReadWrite)
     {
         m_aircraftManager = std::make_unique<AircraftManager>(this);
 
@@ -319,6 +327,28 @@ namespace unifly
 				    m_aircraftManager->HandleReportContext(msg.remote_report_context());
 				});
 				break;
+			}
+			case unifly::schema::v1::XPlaneMessage::kLocalTeleport: {
+                QueueCallback([msg = std::move(msg), this]() mutable {
+                    const unifly::schema::v1::LocalTeleport& teleport = msg.local_teleport();
+
+                    double pos_x = 0.0;
+                    double pos_y = 0.0;
+                    double pos_z = 0.0;
+
+                    XPLMWorldToLocal(teleport.lat(), teleport.lon(), teleport.alt_msl(), &pos_x, &pos_y, &pos_z);
+
+                    // this->m_positionY = this->m_positionY + 10.0;
+                    this->m_positionX = pos_x;
+                    this->m_positionY = pos_y;
+                    this->m_positionZ = pos_z;
+                    this->m_velocityX = 0.0;
+                    this->m_velocityY = 0.0;
+                    this->m_velocityZ = 0.0;
+
+                    // TODO: Orientation uses quaternions ;>
+                });
+			    break;
 			}
 			case unifly::schema::v1::XPlaneMessage::kSettings: {
     			QueueCallback([msg = std::move(msg), this]()

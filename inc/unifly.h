@@ -78,6 +78,14 @@ namespace unifly
         DataRefAccess<float> m_flapRatio;
         DataRefAccess<float> m_speedbrakeRatio;
 
+        // Teleport to
+        DataRefAccess<double> m_positionX;
+        DataRefAccess<double> m_positionY;
+        DataRefAccess<double> m_positionZ;
+        DataRefAccess<float> m_velocityX;
+        DataRefAccess<float> m_velocityY;
+        DataRefAccess<float> m_velocityZ;
+
 		int XPlaneVersion, XPLMVersion, HostID;
 
     private:
