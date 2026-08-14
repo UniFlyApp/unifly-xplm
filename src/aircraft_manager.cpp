@@ -87,6 +87,7 @@ namespace unifly
         auto aircraft = GetAircraft(peer_id);
         if (!aircraft) return;
 
+        aircraft->bClampToGround = remote_report_position.on_ground();
         aircraft->SetOnGrnd(remote_report_position.on_ground());
         aircraft->visual_state.lat = remote_report_position.lat();
         aircraft->visual_state.lon = remote_report_position.lon();

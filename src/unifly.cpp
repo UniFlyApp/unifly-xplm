@@ -110,7 +110,7 @@ namespace unifly
             // If an XPMPPlaneId is not unique, throw an error rather than blindly choosing a new one
             return false;
 		if (!strcmp(item, XPMP_CFG_ITM_CLAMPALL))
-			return true;
+			return false;
 		if (!strcmp(item, XPMP_CFG_ITM_MUTE_ON_PAUSE))
 		    return true;
 		return defaultVal;
