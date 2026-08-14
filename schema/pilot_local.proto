@@ -34,3 +34,12 @@ message LocalReadInfrequent {
 
   bool gear_down = 9;
 }
+
+message LocalTeleport {
+    double lat = 1;
+    double lon = 2;
+    double pitch = 3;
+    double bank = 4;
+    double heading = 5;
+    double alt_msl = 6;
+}
