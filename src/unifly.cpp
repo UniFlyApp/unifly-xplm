@@ -42,6 +42,7 @@ namespace unifly
         m_barometerSeaLevel("sim/weather/barometer_sealevel_inhg", ReadOnly),
 
         m_groundSpeed("sim/flightmodel/position/groundspeed", ReadOnly),
+        m_machSpeed("sim/flightmodel/misc/machno", ReadOnly),
         m_verticalSpeed("sim/flightmodel/position/vh_ind_fpm", ReadOnly),
         m_onGround("sim/flightmodel/failures/onground_any", ReadOnly),
         m_gearDown("sim/cockpit/switches/gear_handle_status", ReadOnly),
@@ -165,7 +166,8 @@ namespace unifly
             read_frequent->set_bank(-1.0F * instance->m_bank);
             read_frequent->set_heading(instance->m_heading);
 
-            read_frequent->set_ground_speed(instance->m_groundSpeed * 1.94384); //meters per second to knots
+            read_frequent->set_speed_ground(instance->m_groundSpeed * 1.94384); //meters per second to knots
+            read_frequent->set_speed_air_mach(instance->m_machSpeed);
             read_frequent->set_vertical_speed(instance->m_verticalSpeed);
             read_frequent->set_on_ground(instance->m_onGround);
 

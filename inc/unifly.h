@@ -71,6 +71,7 @@ namespace unifly
         DataRefAccess<float> m_barometerSeaLevel;
 
         DataRefAccess<float> m_groundSpeed;
+        DataRefAccess<float> m_machSpeed;
         DataRefAccess<float> m_verticalSpeed;
         DataRefAccess<int> m_onGround;
         DataRefAccess<int> m_gearDown;
