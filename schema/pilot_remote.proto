@@ -67,4 +67,6 @@ message RemoteReceiveElevation {
   double elevation = 2;
   double lat = 3;
   double lon = 4;
+
+  double cg_height = 5;
 }

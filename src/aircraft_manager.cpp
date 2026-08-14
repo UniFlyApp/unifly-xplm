@@ -142,6 +142,7 @@ namespace unifly
                     event_elevation->set_lat(lat);
                     event_elevation->set_lon(lon);
                     event_elevation->set_elevation(elevation);
+                    event_elevation->set_cg_height(0.0); //TODO
                     instance->mEnv->send_msg(event_elevation_message);
                 }
             }
