@@ -134,7 +134,7 @@ float AircraftManager::AircraftMaintenanceCallback(float, float, int inCounter,
         double lon = plane.second->visual_state.lon;
         double elevation =
             plane.second->terrain_probe.GetTerrainElevation(lat, lon);
-        float cg_height = plane.second->GetVertOfs();
+        float cg_height = plane.second->GetVertOfs() * 3.2808399; // Meteres to feet
 
         unifly::schema::v1::XPLMMessage event_elevation_message;
         unifly::schema::v1::RemoteReceiveElevation *event_elevation =

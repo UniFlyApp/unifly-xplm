@@ -5,123 +5,114 @@
 
 #include "data_ref_access.h"
 #include "data_ref_owned.h"
-#include "utilities.h"
 #include "socket.h"
+#include "utilities.h"
 
 using asio::ip::tcp;
 
-namespace unifly
-{
+namespace unifly {
 
-    class AircraftManager;
+class AircraftManager;
 
-    class UniFly {
-    public:
-        UniFly();
-        ~UniFly();
+class UniFly {
+public:
+  UniFly();
+  ~UniFly();
 
-		void Initialize();
-		void Shutdown();
-		void TryGetTcasControl();
-		void ReleaseTcasControl();
+  void Initialize();
+  void Shutdown();
+  void TryGetTcasControl();
+  void ReleaseTcasControl();
 
-		void AircraftDeleted(const std::string& callsign);
-		void AircraftAdded(const std::string& callsign);
-		void DeleteAllAircraft();
+  void AircraftDeleted(const std::string &callsign);
+  void AircraftAdded(const std::string &callsign);
+  void DeleteAllAircraft();
 
-		double GetAltitudeStd();
-		bool IsXplane12();
+  double GetAltitudeStd();
+  bool IsXplane12();
 
-		/// All sending is allocated to occur on the xplane thread
-		template<class T>
-		void send_msg(const T& msg)
-		{
-		    if(m_socket) {
-				if (!send_message(*m_socket, msg)) {
-                    LOG_MSG("failed to send a message")
-    				m_keepSocketAlive.store(false);
-    			}
-			}
-		}
+  /// All sending is allocated to occur on the xplane thread
+  template <class T> void send_msg(const T &msg) {
+    if (m_socket) {
+      if (!send_message(*m_socket, msg)) {
+        LOG_MSG("failed to send a message")
+        m_keepSocketAlive.store(false);
+      }
+    }
+  }
 
-	protected:
+protected:
+  OwnedDataRef<int> m_aiControlled;
+  OwnedDataRef<int> m_aircraftCount;
 
-	    OwnedDataRef<int> m_aiControlled;
-	    OwnedDataRef<int> m_aircraftCount;
+  DataRefAccess<int> m_beaconLights;
+  DataRefAccess<int> m_landingLights;
+  DataRefAccess<int> m_taxiLights;
+  DataRefAccess<int> m_navLights;
+  DataRefAccess<int> m_strobeLights;
 
-        DataRefAccess<int> m_beaconLights;
-        DataRefAccess<int> m_landingLights;
-        DataRefAccess<int> m_taxiLights;
-        DataRefAccess<int> m_navLights;
-        DataRefAccess<int> m_strobeLights;
+  DataRefAccess<double> m_latitude;
+  DataRefAccess<double> m_longitude;
+  DataRefAccess<float> m_pitch;
+  DataRefAccess<float> m_heading;
+  DataRefAccess<float> m_bank;
 
-        DataRefAccess<double> m_latitude;
-        DataRefAccess<double> m_longitude;
-        DataRefAccess<float> m_pitch;
-        DataRefAccess<float> m_heading;
-        DataRefAccess<float> m_bank;
+  /// The elevation above MSL of the aircraft
+  DataRefAccess<double> m_altitudeMslM;
+  DataRefAccess<float> m_altitudeAglM;
+  /// User airplane altitude as pressure altitude in standard atmosphere
+  DataRefAccess<double> m_altitudeStd;
 
-        /// The elevation above MSL of the aircraft
-        DataRefAccess<double> m_altitudeMslM;
-        DataRefAccess<float> m_altitudeAglM;
-        /// User airplane altitude as pressure altitude in standard atmosphere
-        DataRefAccess<double> m_altitudeStd;
+  DataRefAccess<float> m_altitudeTemperatureEffect;
+  DataRefAccess<float> m_barometerSeaLevel;
 
-        DataRefAccess<float> m_altitudeTemperatureEffect;
-        DataRefAccess<float> m_barometerSeaLevel;
+  DataRefAccess<float> m_groundSpeed;
+  DataRefAccess<float> m_machSpeed;
+  DataRefAccess<float> m_verticalSpeed;
+  DataRefAccess<int> m_onGround;
+  DataRefAccess<int> m_gearDown;
+  DataRefAccess<float> m_flapRatio;
+  DataRefAccess<float> m_speedbrakeRatio;
 
-        DataRefAccess<float> m_groundSpeed;
-        DataRefAccess<float> m_machSpeed;
-        DataRefAccess<float> m_verticalSpeed;
-        DataRefAccess<int> m_onGround;
-        DataRefAccess<int> m_gearDown;
-        DataRefAccess<float> m_flapRatio;
-        DataRefAccess<float> m_speedbrakeRatio;
+  // Teleport to
+  DataRefAccess<double> m_positionX;
+  DataRefAccess<double> m_positionY;
+  DataRefAccess<double> m_positionZ;
+  DataRefAccess<float> m_velocityX;
+  DataRefAccess<float> m_velocityY;
+  DataRefAccess<float> m_velocityZ;
 
-        // Teleport to
-        DataRefAccess<double> m_positionX;
-        DataRefAccess<double> m_positionY;
-        DataRefAccess<double> m_positionZ;
-        DataRefAccess<float> m_velocityX;
-        DataRefAccess<float> m_velocityY;
-        DataRefAccess<float> m_velocityZ;
+  int XPlaneVersion, XPLMVersion, HostID;
 
-		int XPlaneVersion, XPLMVersion, HostID;
+private:
+  static float DeferredStartup(float, float, int, void *ref);
+  static float MainFlightLoop(float, float, int, void *ref);
+  bool InitializeXPMP();
 
-    private:
-    	static float DeferredStartup(float, float, int, void* ref);
-    	static float MainFlightLoop(float, float, int, void* ref);
-    	bool InitializeXPMP();
+  std::atomic<bool> m_keepSocketAlive = false;
+  std::shared_ptr<tcp::socket> m_socket;
+  std::unique_ptr<std::thread> m_socketThread;
 
-        std::atomic<bool> m_keepSocketAlive = false;
-        std::shared_ptr<tcp::socket> m_socket;
-        std::unique_ptr<std::thread> m_socketThread;
+  void SocketWorker();
+  void ProcessPacket(const unifly::schema::v1::XPlaneMessage msg);
 
-		void SocketWorker();
-		void ProcessPacket(const unifly::schema::v1::XPlaneMessage msg);
+  std::mutex m_mutex;
+  std::deque<std::function<void()>> m_queuedCallbacks;
+  void InvokeQueuedCallbacks();
+  void QueueCallback(const std::function<void()> &cb);
 
-		std::mutex m_mutex;
-		std::deque<std::function<void()>> m_queuedCallbacks;
-		void InvokeQueuedCallbacks();
-		void QueueCallback(const std::function<void()>& cb);
-
-		std::unique_ptr<AircraftManager> m_aircraftManager;
-    };
-
-
-    struct Global {
-        public:
-
-        std::thread::id xpThread;
-
-        void MarkXPlaneThread()
-        {
-            xpThread = std::this_thread::get_id();
-        }
-
-        bool IsXPThread() const { return std::this_thread::get_id() == xpThread; }
-    };
-
-    extern Global global;
-
+  std::unique_ptr<AircraftManager> m_aircraftManager;
 };
+
+struct Global {
+public:
+  std::thread::id xpThread;
+
+  void MarkXPlaneThread() { xpThread = std::this_thread::get_id(); }
+
+  bool IsXPThread() const { return std::this_thread::get_id() == xpThread; }
+};
+
+extern Global global;
+
+}; // namespace unifly
