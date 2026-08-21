@@ -41,6 +41,24 @@ jobs:
   build_windows:
     runs-on: [self-hosted, Windows, X64]
     steps:
+      - name: Inspect vcpkg git state
+        shell: powershell
+        run: |
+          $gitDir = "$env:GITHUB_WORKSPACE\.git\modules\vcpkg"
+
+          Write-Host "Workspace: $env:GITHUB_WORKSPACE"
+          Write-Host "vcpkg git dir: $gitDir"
+
+          if (Test-Path "$gitDir\index.lock") {
+            Write-Host "!!! index.lock EXISTS BEFORE checkout !!!"
+            Get-Item "$gitDir\index.lock" | Format-List *
+          } else {
+            Write-Host "No vcpkg index.lock before checkout"
+          }
+
+          Get-Process git,git-remote-https,git-remote-http -ErrorAction SilentlyContinue |
+            Select-Object Id, ProcessName, StartTime
+
       - uses: actions/checkout@v7
         with:
           submodules: recursive
