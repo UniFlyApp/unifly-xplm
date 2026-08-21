@@ -14,75 +14,66 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
-*/
+ */
 
 #include "network_aircraft.h"
 #include "utilities.h"
 
-namespace unifly
-{
-    NetworkAircraft::NetworkAircraft(
-        const int peer_id,
-        const AircraftVisualState& _visualState,
-        const std::string& _callsign,
-        const std::string& _icaoType,
-		const std::string& _icaoAirline,
-		const std::string& _livery,
-		const std::string& _modelName = ""
-    ) : XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, peer_id, _modelName),
-        peer_id(peer_id)
-    {
-        strScpy(acInfoTexts.tailNum, _callsign.c_str(), sizeof(acInfoTexts.tailNum));
-		strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(), sizeof(acInfoTexts.icaoAcType));
-		strScpy(acInfoTexts.icaoAirline, acIcaoAirline.c_str(), sizeof(acInfoTexts.icaoAirline));
+namespace unifly {
+NetworkAircraft::NetworkAircraft(const int peer_id,
+                                 const AircraftVisualState &_visualState,
+                                 const std::string &_callsign,
+                                 const std::string &_icaoType,
+                                 const std::string &_icaoAirline,
+                                 const std::string &_livery,
+                                 const std::string &_modelName = "")
+    : XPMP2::Aircraft(_icaoType, _icaoAirline, _livery, peer_id, _modelName),
+      peer_id(peer_id) {
+  strScpy(acInfoTexts.tailNum, _callsign.c_str(), sizeof(acInfoTexts.tailNum));
+  strScpy(acInfoTexts.icaoAcType, acIcaoType.c_str(),
+          sizeof(acInfoTexts.icaoAcType));
+  strScpy(acInfoTexts.icaoAirline, acIcaoAirline.c_str(),
+          sizeof(acInfoTexts.icaoAirline));
 
-		SetVisible(true);
-		SetLocation(_visualState.lat, _visualState.lon, _visualState.alt_msl);
-		SetHeading(_visualState.heading);
-		SetPitch(-1.0F * _visualState.pitch);
-		SetRoll(-1.0F * _visualState.bank);
+  SetVisible(true);
+  SetLocation(_visualState.lat, _visualState.lon, _visualState.alt_msl);
+  SetHeading(_visualState.heading);
+  SetPitch(-1.0F * _visualState.pitch);
+  SetRoll(-1.0F * _visualState.bank);
 
-		label = _callsign;
-        colLabel[0] = 0.0f;
-        colLabel[1] = 1.0f;
-        colLabel[2] = 0.0f;
+  label = _callsign;
+  colLabel[0] = 0.0f;
+  colLabel[1] = 1.0f;
+  colLabel[2] = 0.0f;
 
-		visual_state = _visualState;
+  visual_state = _visualState;
 
-		SetOnGrnd(false);
-    }
-
-
-    void NetworkAircraft::UpdatePosition(float _frameRatePeriod, int)
-    {
-        SetLocation(
-            visual_state.lat,
-            visual_state.lon,
-            visual_state.alt_msl
-        );
-        SetHeading(visual_state.heading);
-        SetRoll(-1.0F * visual_state.bank);
-        SetPitch(-1.0F * visual_state.pitch);
-
-        if (engines) {
-            SetEngineRotRpm(1200);
-            SetPropRotRpm(GetEngineRotRpm());
-            SetEngineRotAngle(GetEngineRotAngle() + RpmToDegree(GetEngineRotRpm(), _frameRatePeriod));
-			while (GetEngineRotAngle() >= 360.0f)
-			{
-				SetEngineRotAngle(GetEngineRotAngle() - 360.0f);
-			}
-			SetPropRotAngle(GetEngineRotAngle());
-			SetThrustRatio(1.0f);
-        }
-        else
-		{
-			SetEngineRotRpm(0.0f);
-			SetPropRotRpm(0.0f);
-			SetEngineRotAngle(0.0f);
-			SetPropRotAngle(0.0f);
-			SetThrustRatio(0.0f);
-		}
-    }
-
+  SetOnGrnd(false);
 }
+
+void NetworkAircraft::UpdatePosition(float _frameRatePeriod, int) {
+  SetLocation(visual_state.lat, visual_state.lon, visual_state.alt_msl);
+  SetHeading(visual_state.heading);
+  SetRoll(-1.0F * visual_state.bank);
+  SetPitch(-1.0F * visual_state.pitch);
+
+  if (engines) {
+    SetEngineRotRpm(1200);
+    SetPropRotRpm(GetEngineRotRpm());
+    SetEngineRotAngle(GetEngineRotAngle() +
+                      RpmToDegree(GetEngineRotRpm(), _frameRatePeriod));
+    while (GetEngineRotAngle() >= 360.0f) {
+      SetEngineRotAngle(GetEngineRotAngle() - 360.0f);
+    }
+    SetPropRotAngle(GetEngineRotAngle());
+    SetThrustRatio(1.0f);
+  } else {
+    SetEngineRotRpm(0.0f);
+    SetPropRotRpm(0.0f);
+    SetEngineRotAngle(0.0f);
+    SetPropRotAngle(0.0f);
+    SetThrustRatio(0.0f);
+  }
+}
+
+} // namespace unifly

@@ -14,7 +14,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see http://www.gnu.org/licenses/.
-*/
+ */
 
 #include "aircraft_manager.h"
 #include "XPMPAircraft.h"
@@ -24,176 +24,169 @@
 #include "unifly.h"
 #include "utilities.h"
 
-namespace unifly
-{
-    mapPlanesTy mapPlanes;
+namespace unifly {
+mapPlanesTy mapPlanes;
 
-    AircraftManager::AircraftManager(UniFly* instance) :
-        mEnv(instance)
-    {
-        ThisThreadIsXplane();
-        XPLMRegisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, -1.0f, this);
-		XPMPRegisterPlaneNotifierFunc(&AircraftManager::AircraftNotifierCallback, this);
-    }
-
-    AircraftManager::~AircraftManager()
-    {
-        XPLMUnregisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback, nullptr);
-		XPMPUnregisterPlaneNotifierFunc(&AircraftManager::AircraftNotifierCallback, nullptr);
-    }
-
-    void AircraftManager::HandleSpawn(const unifly::schema::v1::RemoteSpawn& remote_spawn)
-    {
-        const int peer_id = remote_spawn.peer_id();
-        LOG_MSG("handle spawn %u", peer_id);
-
-        auto planeIt = GetAircraft(peer_id);
-        if (planeIt) {
-            // Remove the plane
-            HandleDespawn(peer_id);
-            return;
-        }
-
-        const std::string& model = remote_spawn.model();
-        const std::string& callsign = remote_spawn.callsign();
-        const std::string& airline = remote_spawn.airline();
-        const std::string& aircraft = remote_spawn.aircraft();
-
-        AircraftVisualState visual_state{};
-        visual_state.lat = remote_spawn.lat();
-        visual_state.lon = remote_spawn.lon();
-        visual_state.pitch = remote_spawn.pitch();
-        visual_state.bank = remote_spawn.bank();
-        visual_state.heading = remote_spawn.heading();
-        visual_state.alt_msl = remote_spawn.alt_msl();
-
-        NetworkAircraft* plane = new NetworkAircraft(peer_id, visual_state, callsign, aircraft, airline, "", model);
-        mapPlanes.emplace(peer_id, std::move(plane));
-    }
-
-    void AircraftManager::HandleDespawn(const int peer_id)
-    {
-        mapPlanes.erase(peer_id);
-    }
-
-    void AircraftManager::DespawnAll()
-    {
-        mapPlanes.clear();
-    }
-
-    void AircraftManager::HandleReportPosition(const unifly::schema::v1::RemoteReportPosition& remote_report_position)
-    {
-        const int peer_id = remote_report_position.peer_id();
-        auto aircraft = GetAircraft(peer_id);
-        if (!aircraft) return;
-
-        aircraft->bClampToGround = remote_report_position.on_ground();
-        aircraft->SetOnGrnd(remote_report_position.on_ground());
-        aircraft->visual_state.lat = remote_report_position.lat();
-        aircraft->visual_state.lon = remote_report_position.lon();
-        aircraft->visual_state.pitch = remote_report_position.pitch();
-        aircraft->visual_state.bank = remote_report_position.bank();
-        aircraft->visual_state.heading = remote_report_position.heading();
-        aircraft->visual_state.alt_msl = remote_report_position.alt_msl();
-    }
-
-    void AircraftManager::HandleReportContext(const unifly::schema::v1::RemoteReportContext& remote_report_context)
-    {
-        const int peer_id = remote_report_context.peer_id();
-        auto aircraft = GetAircraft(peer_id);
-        if (!aircraft) return;
-
-        aircraft->SetFlapRatio(remote_report_context.flaps());
-        aircraft->SetSlatRatio(remote_report_context.flaps());
-        aircraft->SetSpoilerRatio(remote_report_context.spoilers());
-        aircraft->SetSpeedbrakeRatio(remote_report_context.spoilers());
-        aircraft->SetGearRatio(remote_report_context.gear() ? 1.0f : 0.0f);
-        aircraft->SetLightsStrobe(remote_report_context.lights_strobe());
-        aircraft->SetLightsTaxi(remote_report_context.lights_taxi());
-        aircraft->SetLightsNav(remote_report_context.lights_nav());
-        aircraft->SetLightsLanding(remote_report_context.lights_landing());
-        aircraft->SetLightsBeacon(remote_report_context.lights_beacon());
-        aircraft->engines = remote_report_context.engines();
-    }
-
-    NetworkAircraft* AircraftManager::GetAircraft(const int peer_id)
-    {
-        auto planeIt = mapPlanes.find(peer_id);
-        if (planeIt == mapPlanes.end()) return nullptr;
-        return planeIt->second.get();
-    }
-
-    float AircraftManager::AircraftMaintenanceCallback(float, float, int inCounter, void* ref)
-    {
-        auto* instance = static_cast<AircraftManager*>(ref);
-        if (instance)
-        {
-            // Terrain reports
-            // Counter counts in twos
-            if (inCounter % (20 * 2) <= 1) {
-                for (const auto& plane: mapPlanes)
-                {
-                    double lat = plane.second->visual_state.lat;
-                    double lon = plane.second->visual_state.lon;
-                    double elevation = plane.second->terrain_probe.GetTerrainElevation(lat, lon);
-                    float cg_height = plane.second->GetVertOfs();
-
-
-                    unifly::schema::v1::XPLMMessage event_elevation_message;
-                    unifly::schema::v1::RemoteReceiveElevation* event_elevation = event_elevation_message.mutable_remote_elevation();
-                    event_elevation->set_peer_id(plane.second->peer_id);
-                    event_elevation->set_lat(lat);
-                    event_elevation->set_lon(lon);
-                    event_elevation->set_elevation(elevation);
-                    event_elevation->set_cg_height(cg_height);
-
-
-                    instance->mEnv->send_msg(event_elevation_message);
-                }
-            }
-        }
-        return -1.0f;
-    }
-
-    void AircraftManager::AircraftNotifierCallback(XPMPPlaneID peer_id, XPMPPlaneNotification inNotification, void* ref)
-    {
-        auto* instance = static_cast<AircraftManager*>(ref);
-        if (instance)
-        {
-            XPMP2::Aircraft* pAc = XPMPGetAircraft(peer_id);
-            if (pAc)
-            {
-
-                LOG_MSG("Plane (%u) of type %s, airline %s, model %s, label '%s' %s",
-                       peer_id,
-                       pAc->acIcaoType.c_str(),
-                       pAc->acIcaoAirline.c_str(),
-                       pAc->GetModelName().c_str(),
-                       pAc->label.c_str(),
-                       inNotification == xpmp_PlaneNotification_Created ? "created" :
-                       inNotification == xpmp_PlaneNotification_ModelChanged ? "changed" : "destroyed");
-
-                // Send spawn/despawn notification
-                if (inNotification == xpmp_PlaneNotification_Created)
-                {
-                    unifly::schema::v1::XPLMMessage message;
-                    unifly::schema::v1::RemoteSpawned* remote_spawned = message.mutable_remote_spawned();
-                    remote_spawned->set_peer_id(peer_id);
-                    remote_spawned->set_model(pAc->GetModelName());
-                    instance->mEnv->send_msg(message);
-                }
-                else if (inNotification == xpmp_PlaneNotification_Destroyed)
-                {
-                    unifly::schema::v1::XPLMMessage message;
-                    unifly::schema::v1::RemoteDespawned* remote_despawned = message.mutable_remote_despawned();
-                    remote_despawned->set_peer_id(peer_id);
-                    remote_despawned->set_model(pAc->GetModelName());
-                    instance->mEnv->send_msg(message);
-                }
-            } else {
-                LOG_MSG("notifier callback did not find the plane id");
-            }
-        }
-    }
-
+AircraftManager::AircraftManager(UniFly *instance) : mEnv(instance) {
+  ThisThreadIsXplane();
+  XPLMRegisterFlightLoopCallback(&AircraftManager::AircraftMaintenanceCallback,
+                                 -1.0f, this);
+  XPMPRegisterPlaneNotifierFunc(&AircraftManager::AircraftNotifierCallback,
+                                this);
 }
+
+AircraftManager::~AircraftManager() {
+  XPLMUnregisterFlightLoopCallback(
+      &AircraftManager::AircraftMaintenanceCallback, nullptr);
+  XPMPUnregisterPlaneNotifierFunc(&AircraftManager::AircraftNotifierCallback,
+                                  nullptr);
+}
+
+void AircraftManager::HandleSpawn(
+    const unifly::schema::v1::RemoteSpawn &remote_spawn) {
+  const int peer_id = remote_spawn.peer_id();
+  LOG_MSG("handle spawn %u", peer_id);
+
+  auto planeIt = GetAircraft(peer_id);
+  if (planeIt) {
+    // Remove the plane
+    HandleDespawn(peer_id);
+    return;
+  }
+
+  const std::string &model = remote_spawn.model();
+  const std::string &callsign = remote_spawn.callsign();
+  const std::string &airline = remote_spawn.airline();
+  const std::string &aircraft = remote_spawn.aircraft();
+
+  AircraftVisualState visual_state{};
+  visual_state.lat = remote_spawn.lat();
+  visual_state.lon = remote_spawn.lon();
+  visual_state.pitch = remote_spawn.pitch();
+  visual_state.bank = remote_spawn.bank();
+  visual_state.heading = remote_spawn.heading();
+  visual_state.alt_msl = remote_spawn.alt_msl();
+
+  NetworkAircraft *plane = new NetworkAircraft(peer_id, visual_state, callsign,
+                                               aircraft, airline, "", model);
+  mapPlanes.emplace(peer_id, std::move(plane));
+}
+
+void AircraftManager::HandleDespawn(const int peer_id) {
+  mapPlanes.erase(peer_id);
+}
+
+void AircraftManager::DespawnAll() { mapPlanes.clear(); }
+
+void AircraftManager::HandleReportPosition(
+    const unifly::schema::v1::RemoteReportPosition &remote_report_position) {
+  const int peer_id = remote_report_position.peer_id();
+  auto aircraft = GetAircraft(peer_id);
+  if (!aircraft)
+    return;
+
+  aircraft->bClampToGround = remote_report_position.on_ground();
+  aircraft->SetOnGrnd(remote_report_position.on_ground());
+  aircraft->visual_state.lat = remote_report_position.lat();
+  aircraft->visual_state.lon = remote_report_position.lon();
+  aircraft->visual_state.pitch = remote_report_position.pitch();
+  aircraft->visual_state.bank = remote_report_position.bank();
+  aircraft->visual_state.heading = remote_report_position.heading();
+  aircraft->visual_state.alt_msl = remote_report_position.alt_msl();
+}
+
+void AircraftManager::HandleReportContext(
+    const unifly::schema::v1::RemoteReportContext &remote_report_context) {
+  const int peer_id = remote_report_context.peer_id();
+  auto aircraft = GetAircraft(peer_id);
+  if (!aircraft)
+    return;
+
+  aircraft->SetFlapRatio(remote_report_context.flaps());
+  aircraft->SetSlatRatio(remote_report_context.flaps());
+  aircraft->SetSpoilerRatio(remote_report_context.spoilers());
+  aircraft->SetSpeedbrakeRatio(remote_report_context.spoilers());
+  aircraft->SetGearRatio(remote_report_context.gear() ? 1.0f : 0.0f);
+  aircraft->SetLightsStrobe(remote_report_context.lights_strobe());
+  aircraft->SetLightsTaxi(remote_report_context.lights_taxi());
+  aircraft->SetLightsNav(remote_report_context.lights_nav());
+  aircraft->SetLightsLanding(remote_report_context.lights_landing());
+  aircraft->SetLightsBeacon(remote_report_context.lights_beacon());
+  aircraft->engines = remote_report_context.engines();
+}
+
+NetworkAircraft *AircraftManager::GetAircraft(const int peer_id) {
+  auto planeIt = mapPlanes.find(peer_id);
+  if (planeIt == mapPlanes.end())
+    return nullptr;
+  return planeIt->second.get();
+}
+
+float AircraftManager::AircraftMaintenanceCallback(float, float, int inCounter,
+                                                   void *ref) {
+  auto *instance = static_cast<AircraftManager *>(ref);
+  if (instance) {
+    // Terrain reports
+    // Counter counts in twos
+    if (inCounter % (20 * 2) <= 1) {
+      for (const auto &plane : mapPlanes) {
+        double lat = plane.second->visual_state.lat;
+        double lon = plane.second->visual_state.lon;
+        double elevation =
+            plane.second->terrain_probe.GetTerrainElevation(lat, lon);
+        float cg_height = plane.second->GetVertOfs();
+
+        unifly::schema::v1::XPLMMessage event_elevation_message;
+        unifly::schema::v1::RemoteReceiveElevation *event_elevation =
+            event_elevation_message.mutable_remote_elevation();
+        event_elevation->set_peer_id(plane.second->peer_id);
+        event_elevation->set_lat(lat);
+        event_elevation->set_lon(lon);
+        event_elevation->set_elevation(elevation);
+        event_elevation->set_cg_height(cg_height);
+
+        instance->mEnv->send_msg(event_elevation_message);
+      }
+    }
+  }
+  return -1.0f;
+}
+
+void AircraftManager::AircraftNotifierCallback(
+    XPMPPlaneID peer_id, XPMPPlaneNotification inNotification, void *ref) {
+  auto *instance = static_cast<AircraftManager *>(ref);
+  if (instance) {
+    XPMP2::Aircraft *pAc = XPMPGetAircraft(peer_id);
+    if (pAc) {
+
+      LOG_MSG("Plane (%u) of type %s, airline %s, model %s, label '%s' %s",
+              peer_id, pAc->acIcaoType.c_str(), pAc->acIcaoAirline.c_str(),
+              pAc->GetModelName().c_str(), pAc->label.c_str(),
+              inNotification == xpmp_PlaneNotification_Created ? "created"
+              : inNotification == xpmp_PlaneNotification_ModelChanged
+                  ? "changed"
+                  : "destroyed");
+
+      // Send spawn/despawn notification
+      if (inNotification == xpmp_PlaneNotification_Created) {
+        unifly::schema::v1::XPLMMessage message;
+        unifly::schema::v1::RemoteSpawned *remote_spawned =
+            message.mutable_remote_spawned();
+        remote_spawned->set_peer_id(peer_id);
+        remote_spawned->set_model(pAc->GetModelName());
+        instance->mEnv->send_msg(message);
+      } else if (inNotification == xpmp_PlaneNotification_Destroyed) {
+        unifly::schema::v1::XPLMMessage message;
+        unifly::schema::v1::RemoteDespawned *remote_despawned =
+            message.mutable_remote_despawned();
+        remote_despawned->set_peer_id(peer_id);
+        remote_despawned->set_model(pAc->GetModelName());
+        instance->mEnv->send_msg(message);
+      }
+    } else {
+      LOG_MSG("notifier callback did not find the plane id");
+    }
+  }
+}
+
+} // namespace unifly
