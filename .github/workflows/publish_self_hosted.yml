@@ -24,7 +24,7 @@ jobs:
 
       - name: Build
         env:
-          VCPKG_ROOT: /Users/tom/Documents/Coding/vcpkg/scripts/buildsystems/vcpkg.cmake
+          VCPKG_ROOT: /Users/tom/Documents/Coding/vcpkg
         run: |
           cmake -B build_arm64 -DCMAKE_BUILD_TYPE=Release --preset=mac-arm64
           cmake --build build_arm64
