@@ -18,7 +18,7 @@ jobs:
   build_macos:
     runs-on: [self-hosted, macOS, ARM64]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -41,7 +41,7 @@ jobs:
   build_windows:
     runs-on: [self-hosted, Windows, X64]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -70,7 +70,7 @@ jobs:
     needs: [build_macos, build_windows]
     runs-on: [self-hosted, macOS, ARM64]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/download-artifact@v4
         with:
