@@ -72,6 +72,7 @@ PLUGIN_API void XPluginDisable(void) {
 
 PLUGIN_API void XPluginStop(void) {
   try {
+    // TODO: These are important?
     // XPLMDestroyMenu(PluginMenu);
     // XPLMUnregisterCommandHandler(PttCommand, PttCommandHandler, 0, 0);
     // XPLMUnregisterCommandHandler(SplitAudioChannelCommand,

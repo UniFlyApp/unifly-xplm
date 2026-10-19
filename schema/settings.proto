@@ -9,6 +9,8 @@ message Settings {
   AircraftLabelRange aircraft_label_range = 4;
   bool aircraft_label_visibility_cutoff = 5;
 
+  string csl_path = 6;
+
   // bool sounds_enabled = 3;
   // string sounds_device = 4;
 }

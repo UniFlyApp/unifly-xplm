@@ -1,4 +1,5 @@
 #include "config.h"
+#include "XPMPMultiplayer.h"
 #include "message.pb.h"
 #include "plugin.h"
 #include "settings.pb.h"
@@ -13,6 +14,12 @@ Config &Config::GetInstance() {
 
 void Config::LoadConfig(const unifly::schema::v1::Settings &settings) {
   LOG_MSG("load config");
+
+  // Load CSL models
+  auto res = XPMPLoadCSLPackage(settings.csl_path().c_str());
+  if (*res) {
+    LOG_MSG("UniFly: Error while loading CSL packages: %s", res);
+  }
 
   SetAircraftLabelShow(settings.aircraft_label_show());
   SetAircraftLabelColour(settings.aircraft_label_colour());
