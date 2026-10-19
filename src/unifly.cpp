@@ -133,7 +133,7 @@ bool UniFly::InitializeXPMP() {
 
   // Load our CSL models
   auto res = XPMPLoadCSLPackage(pathResources.c_str());
-  if (*err) {
+  if (*res) {
     LOG_MSG("UniFly: Error while loading CSL packages: %s", res);
     return false;
   }
