@@ -6,6 +6,7 @@
 #include "message.pb.h"
 #include "pilot_local.pb.h"
 #include "plugin.h"
+#include "settings.pb.h"
 #include "socket.h"
 #include "utilities.h"
 
@@ -257,16 +258,6 @@ void UniFly::SocketWorker() {
           open->set_version_xplane(XPlaneVersion);
           open->set_version_plugin(UNIFLY_PLUGIN_VERSION);
 
-          // Fetch models
-          for (int i = 0; i < XPMPGetNumberOfInstalledModels(); ++i) {
-            std::string modelName, icao, airline, livery;
-            XPMPGetModelInfo2(i, modelName, icao, airline, livery);
-
-            if (!modelName.empty()) {
-              open->add_models(modelName);
-            }
-          }
-
           send_msg(open_msg);
         });
 
@@ -353,6 +344,33 @@ void UniFly::ProcessPacket(const unifly::schema::v1::XPlaneMessage msg) {
   case unifly::schema::v1::XPlaneMessage::kSettings: {
     QueueCallback([msg = std::move(msg), this]() {
       Config::GetInstance().LoadConfig(msg.settings());
+    });
+  }
+  case unifly::schema::v1::XPlaneMessage::kModels: {
+    QueueCallback([msg = std::move(msg), this]() {
+        LOG_MSG("UniFly: Loading selected CSL models: %s", msg.models().path().c_str());
+
+        // Load the requested CSL models
+        auto res = XPMPLoadCSLPackage(msg.models().path().c_str());
+        if (*res) {
+            LOG_MSG("UniFly: Error while loading CSL packages: %s", res);
+        }
+
+        unifly::schema::v1::XPLMMessage models_msg;
+        unifly::schema::v1::LoadedModels *models = models_msg.mutable_models();
+
+        // Fetch models
+        for (int i = 0; i < XPMPGetNumberOfInstalledModels(); ++i) {
+            std::string modelName, icao, airline, livery;
+            XPMPGetModelInfo2(i, modelName, icao, airline, livery);
+
+            if (!modelName.empty()) {
+                models->add_models(modelName);
+            }
+        }
+
+        // Send back the model titles we've loaded
+        send_msg(models_msg);
     });
   }
   case unifly::schema::v1::XPlaneMessage::KIND_NOT_SET: {

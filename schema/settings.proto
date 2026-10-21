@@ -2,14 +2,20 @@ syntax = "proto3";
 
 package unifly.schema.v1;
 
+message LoadModels {
+    string path = 1;
+}
+
+message LoadedModels {
+    repeated string models = 2;
+}
+
 message Settings {
   bool aircraft_label_show = 1;
   AircraftLabelType aircraft_label_type = 2;
   AircraftLabelColour aircraft_label_colour = 3;
   AircraftLabelRange aircraft_label_range = 4;
   bool aircraft_label_visibility_cutoff = 5;
-
-  string csl_path = 6;
 
   // bool sounds_enabled = 3;
   // string sounds_device = 4;

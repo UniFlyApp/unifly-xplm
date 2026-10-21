@@ -18,6 +18,8 @@ message XPlaneMessage {
     LocalTeleport local_teleport = 6;
 
     Settings settings = 5;
+
+    LoadModels models = 7;
   }
 }
 
@@ -36,6 +38,7 @@ message XPLMMessage {
     LocalReadInfrequent local_read_infrequent = 8;
 
     Settings settings = 9;
+    LoadedModels models = 10;
   }
 }
 
@@ -44,7 +47,6 @@ message EventOpen {
   uint32 version_xplm = 1;
   uint32 version_xplane = 2;
   uint32 version_plugin = 3;
-  repeated string models = 5;
 }
 
 message EventFrame {
