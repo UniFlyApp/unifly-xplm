@@ -1,7 +1,7 @@
 #pragma once
 
 // Change the expected unifly plugin version in net_shared.rs
-#define UNIFLY_PLUGIN_VERSION 120
+#define UNIFLY_PLUGIN_VERSION 130
 
 #include "data_ref_access.h"
 #include "data_ref_owned.h"
