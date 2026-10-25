@@ -348,12 +348,18 @@ void UniFly::ProcessPacket(const unifly::schema::v1::XPlaneMessage msg) {
   }
   case unifly::schema::v1::XPlaneMessage::kModels: {
     QueueCallback([msg = std::move(msg), this]() {
-        LOG_MSG("UniFly: Loading selected CSL models: %s", msg.models().path().c_str());
+        const auto& path = msg.models().path();
 
-        // Load the requested CSL models
-        auto res = XPMPLoadCSLPackage(msg.models().path().c_str());
-        if (*res) {
-            LOG_MSG("UniFly: Error while loading CSL packages: %s", res);
+        if (path.empty()) {
+            LOG_MSG("UniFly: LoadModels with empty path");
+        } else {
+            LOG_MSG("UniFly: Loading selected CSL models: %s", path.c_str());
+
+            // Load the requested CSL models
+            auto res = XPMPLoadCSLPackage(path.c_str());
+            if (*res) {
+                LOG_MSG("UniFly: Error while loading CSL packages: %s", res);
+            }
         }
 
         unifly::schema::v1::XPLMMessage models_msg;
