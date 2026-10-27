@@ -345,10 +345,11 @@ void UniFly::ProcessPacket(const unifly::schema::v1::XPlaneMessage msg) {
     QueueCallback([msg = std::move(msg), this]() {
       Config::GetInstance().LoadConfig(msg.settings());
     });
+    break;
   }
-  case unifly::schema::v1::XPlaneMessage::kModels: {
+  case unifly::schema::v1::XPlaneMessage::kLoadModels: {
     QueueCallback([msg = std::move(msg), this]() {
-        const auto& path = msg.models().path();
+        const auto& path = msg.load_models().path();
 
         if (path.empty()) {
             LOG_MSG("UniFly: LoadModels with empty path");
@@ -363,7 +364,7 @@ void UniFly::ProcessPacket(const unifly::schema::v1::XPlaneMessage msg) {
         }
 
         unifly::schema::v1::XPLMMessage models_msg;
-        unifly::schema::v1::LoadedModels *models = models_msg.mutable_models();
+        unifly::schema::v1::LoadedModels *models = models_msg.mutable_loaded_models();
 
         // Fetch models
         int num_models = XPMPGetNumberOfInstalledModels();
@@ -382,6 +383,7 @@ void UniFly::ProcessPacket(const unifly::schema::v1::XPlaneMessage msg) {
         send_msg(models_msg);
         LOG_MSG("UniFly: Returned loaded models to uniflyapp");
     });
+    break;
   }
   case unifly::schema::v1::XPlaneMessage::KIND_NOT_SET: {
     break;

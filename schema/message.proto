@@ -19,7 +19,7 @@ message XPlaneMessage {
 
     Settings settings = 5;
 
-    LoadModels models = 7;
+    LoadModels load_models = 7;
   }
 }
 
@@ -38,7 +38,7 @@ message XPLMMessage {
     LocalReadInfrequent local_read_infrequent = 8;
 
     Settings settings = 9;
-    LoadedModels models = 10;
+    LoadedModels loaded_models = 10;
   }
 }
 
