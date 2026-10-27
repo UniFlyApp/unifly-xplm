@@ -22,6 +22,7 @@ void Config::LoadConfig(const unifly::schema::v1::Settings &settings) {
   SetAircraftLabelVisibilityCutoff(settings.aircraft_label_visibility_cutoff());
 
   UpdateMenuItems();
+  LOG_MSG("loaded config");
 }
 
 void Config::SaveConfig(UniFly *instance) {

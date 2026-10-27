@@ -366,7 +366,8 @@ void UniFly::ProcessPacket(const unifly::schema::v1::XPlaneMessage msg) {
         unifly::schema::v1::LoadedModels *models = models_msg.mutable_models();
 
         // Fetch models
-        for (int i = 0; i < XPMPGetNumberOfInstalledModels(); ++i) {
+        int num_models = XPMPGetNumberOfInstalledModels();
+        for (int i = 0; i < num_models; ++i) {
             std::string modelName, icao, airline, livery;
             XPMPGetModelInfo2(i, modelName, icao, airline, livery);
 
@@ -376,7 +377,10 @@ void UniFly::ProcessPacket(const unifly::schema::v1::XPlaneMessage msg) {
         }
 
         // Send back the model titles we've loaded
+
+        LOG_MSG("UniFly: Returning %i loaded models to uniflyapp", num_models);
         send_msg(models_msg);
+        LOG_MSG("UniFly: Returned loaded models to uniflyapp");
     });
   }
   case unifly::schema::v1::XPlaneMessage::KIND_NOT_SET: {
